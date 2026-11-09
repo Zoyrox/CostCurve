@@ -16,7 +16,7 @@ for (const f of ['stress-corto', 'stress-lungo', 'stress-decimali']) {
 let falliti = 0;
 const pulisci = s => s.replace(/[\s  ]/g, '');
 for (const [nome, dati] of casi) {
-  const m = C.calcola(dati);
+  const m = C.calcola(dati, { vistaIntera: true });
   writeFileSync(`${dir}/v-${nome}.tex`, T.genera(m));
   try { execFileSync('pdflatex', ['-interaction=nonstopmode', '-halt-on-error', `v-${nome}.tex`], { cwd: dir, stdio: 'ignore' }); }
   catch (e) { console.log(`FAIL ${nome}: non compila`); falliti++; continue; }
@@ -31,6 +31,7 @@ for (const [nome, dati] of casi) {
   }
   if (m.previsione.visibile) attesi.push(N.formatNumero(m.previsione.eac), N.formatNumero(m.previsione.durataPrevista, 1));
   attesi.push(N.formatNumero(m.totalePiano));
+  for (const k of ['bcwp', 'acwp']) for (const [, v] of m.punti[k]) attesi.push(N.formatNumero(v));
   const mancanti = attesi.filter(a => a !== 'n.d.' && !testo.includes(pulisci(a)));
   const esito = mancanti.length === 0 && avvisi === 0;
   if (!esito) falliti++;

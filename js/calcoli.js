@@ -261,9 +261,9 @@
 
   /** Cifre decimali da mostrare sulle tacche dell'asse dei costi (passo 0,5 -> 1 decimale). */
   function decimaliPasso(passo) {
-    if (passo >= 1 - EPS) return 0;
-    const s = numeri.formatNumero(passo, 6).replace(/0+$/, '');
-    return Math.min(6, (s.split(',')[1] || '').length);
+    // il minimo numero di decimali che scrive il passo esattamente (2,5 -> 1; 25 -> 0; 0,25 -> 2)
+    for (let d = 0; d <= 6; d++) if (Math.abs(Math.round(passo * Math.pow(10, d)) / Math.pow(10, d) - passo) <= 1e-9 * Math.max(1, passo)) return d;
+    return 6;
   }
 
   /**

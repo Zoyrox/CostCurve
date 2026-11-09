@@ -176,7 +176,7 @@
         + testo(xm, T + PH + 66, riga1, { size: 10.5, bold: true, anchor, colore })
         + testo(xm, T + PH + 79, riga2, { size: 10.5, bold: true, anchor, colore });
       let ancP = 'middle', ancS = 'middle';
-      if (Math.abs(p.durataPrevista - m.durata) / (xmax - xmin) < 0.08) {
+      if (Math.abs(p.durataPrevista - m.durata) / (xmax - xmin) < 0.12) {
         if (p.durataPrevista < m.durata) { ancP = 'start'; ancS = 'end'; } else { ancP = 'end'; ancS = 'start'; }
       }
       if (dentroX(m.durata)) fuori += marcatore(X(m.durata), C.bcws, 'Fine', 'pianificata', ancP);
@@ -212,7 +212,7 @@
     const descrizione = m.rilevamenti.map(r => `Rilevamento ${r.n} al ${ut.singolare} ${r.t}: BCWS ${fN(r.bcws)}, BCWP ${fN(r.bcwp)}, ACWP ${fN(r.acwp)}, CV ${fN(r.cv)}, SV ${fN(r.sv)}.`).join(' ');
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${r2(H)}" width="${W}" height="${r2(H)}" font-family="${FONT}" role="img" aria-labelledby="${id}-t ${id}-d" data-l="${L}" data-t="${T}" data-pw="${PW}" data-ph="${PH}">`
       + `<title id="${id}-t">Diagramma costi-tempi: ${esc(m.titolo)}</title><desc id="${id}-d">${esc(descrizione)}</desc>`
-      + `<defs><clipPath id="${id}-area"><rect x="${L}" y="${T - 40}" width="${PW + 1}" height="${PH + 40}"/></clipPath>`
+      + `<defs><clipPath id="${id}-area"><rect x="${L}" y="${T - 40}" width="${PW + 84}" height="${PH + 40}"/></clipPath>`
       + `<clipPath id="${id}-curve"><rect x="${L}" y="${T}" width="${PW + 1}" height="${PH}"/></clipPath></defs>`
       + `<rect width="${W}" height="${r2(H)}" fill="${C.fondo}"/>`
       + fuori + `<g clip-path="url(#${id}-curve)">${curve}</g><g clip-path="url(#${id}-area)">${dentro}</g></svg>`;
