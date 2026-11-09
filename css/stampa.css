@@ -1,31 +1,44 @@
 /* =====================================================================
- * stampa.css — "Stampa / Salva come PDF" (livello base, zero librerie)
- * Si stampa solo il report: titolo, grafico, indicatori, frasi,
- * legenda e tabella costi-tempi, su fogli A4.
+ * stampa.css — "Esporta → Stampa" (funziona sempre, senza librerie)
+ * Si stampa solo il report. Il grafico può andare su una pagina
+ * orizzontale dedicata (pagina con nome, scelta nella finestra Esporta).
  * ===================================================================== */
-@page { size: A4; margin: 14mm 13mm 15mm; }
+@page { size: A4 portrait; margin: 13mm 13mm 14mm; }
+@page orizzontale { size: A4 landscape; margin: 11mm 13mm; }
+@page verticale { size: A4 portrait; margin: 13mm 13mm 14mm; }
 
-html, body { background: #fff !important; }
-body { font-size: 9.5pt; color: #000; }
-.testata, .avviso-esempio, .lavoro, .piede, .salta { display: none !important; }
+:root, :root[data-tema="scuro"] {
+  --sfondo: #fff; --superficie: #fff; --superficie-2: #F3F4F6; --bordo: #DDE1E6; --bordo-forte: #C5CBD3;
+  --testo: #111827; --testo-2: #374151; --testo-3: #6B7280; --accento: #0B5CAD; --accento-tenue: #EEF4FA; --accento-testo: #fff;
+  --ok: #047857; --ok-fondo: #E7F6EF; --att: #8A5A00; --att-fondo: #FDF4DC; --err: #B42318; --err-fondo: #FDECEA; --neg: #B34700; --pos: #00775A;
+}
+html, body { background: #fff !important; color: #111827; }
+body { font-size: 9.5pt; }
+.barra, .lavoro, .piede, .salta, .finestra { display: none !important; }
 
 .report { display: block !important; max-width: none; padding: 0; margin: 0; }
-.report-testa { margin-top: 0; padding-top: 3mm; border-top-width: 2.5pt; border-top-color: #D55E00; }
-.report-titolo { font-size: 18pt; }
+.report-scheda { border: 0; box-shadow: none; padding: 0; }
+.report-titolo { font-size: 17pt; }
 .solo-stampa { display: block !important; }
-.report-grafico { margin: 3mm 0 0; break-inside: avoid; }
-.report-grafico svg { width: 100%; height: auto; max-height: 150mm; }
+.report-grafico { margin: 3mm auto 0; break-inside: avoid; text-align: center; }
+.report-grafico svg { width: 84%; height: auto; max-height: 165mm; }
+body[data-stampa-dimensione="grande"] .report-grafico svg { width: 93%; }
+body[data-stampa-dimensione="massima"] .report-grafico svg { width: 100%; }
+/* grafico su una pagina orizzontale dedicata */
+/* la prima pagina è quella del grafico: anche i contenitori devono "iniziare" orizzontali, altrimenti Chromium aggiunge una pagina bianca */
+body[data-stampa-pagina="orizzontale"], body[data-stampa-pagina="orizzontale"] .report, body[data-stampa-pagina="orizzontale"] .report-scheda { page: orizzontale; }
+body[data-stampa-pagina="orizzontale"] .report-scheda > :not(.report-grafico) { page: verticale; }
+body[data-stampa-pagina="orizzontale"] .report-grafico { page: orizzontale; break-after: page; margin-top: 0; }
+.report-titolo-grafico { font-size: 14pt; font-weight: 700; text-align: left; margin: 0 0 2mm; }
+body[data-stampa-pagina="orizzontale"] .report-grafico svg { max-height: 168mm; width: auto; max-width: 100%; }
 .report-griglia { display: block; }
 .report-griglia section { break-inside: avoid; }
-.report h3 { font-size: 12pt; margin-top: 5mm; break-after: avoid; }
-.tabella-indicatori, .tabella-costi { font-size: 8.5pt; }
-.tabella-indicatori th, .tabella-indicatori td, .tabella-costi th, .tabella-costi td { padding: 1.2mm 2mm; }
-.tabella-costi thead { display: table-header-group; }   /* intestazione ripetuta su ogni pagina */
-.tabella-costi tr { break-inside: avoid; }
+.report h3 { font-size: 11.5pt; margin-top: 5mm; break-after: avoid; }
+.tabella-dati { font-size: 8.4pt; }
+.tabella-dati th, .tabella-dati td { padding: 1.1mm 2mm; }
+.tabella-dati thead { display: table-header-group; }
+.tabella-dati tr { break-inside: avoid; }
 .scorri { overflow: visible; }
 .legenda > div { break-inside: avoid; padding: 1mm 0; }
 .frase, .legenda dd, .report-note p { font-size: 9pt; }
-.semaforo, .tag, .tabella-costi tr.ril, .tabella-indicatori thead th, .tabella-costi thead th, .frase.previsione {
-  -webkit-print-color-adjust: exact; print-color-adjust: exact;
-}
-a[href]::after { content: ""; }
+* { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
