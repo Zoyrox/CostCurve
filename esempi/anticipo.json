@@ -1,0 +1,37 @@
+{
+  "formato": "costcurve",
+  "versione": 1,
+  "titolo": "Nuovo gestionale di magazzino",
+  "unitaTempo": "mesi",
+  "unitaMoneta": "migliaia",
+  "durata": 12,
+  "bac": 120,
+  "costiPeriodo": [
+    3,
+    5,
+    8,
+    11,
+    14,
+    16,
+    16,
+    14,
+    12,
+    9,
+    7,
+    5
+  ],
+  "rilevamenti": [
+    {
+      "periodo": 4,
+      "bcwp": 31,
+      "acwp": 28
+    },
+    {
+      "periodo": 8,
+      "bcwp": 95,
+      "acwp": 88
+    }
+  ],
+  "mostraPrevisione": true,
+  "nota": "Dati inventati."
+}

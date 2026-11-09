@@ -162,3 +162,12 @@ test('BCWS a zero al rilevamento: percentuali n.d. senza errori', () => {
   assert.equal(m.rilevamenti[0].pcv, null);
   assert.equal(N.formatPercentuale(m.rilevamenti[0].pcv), 'n.d.');
 });
+
+test('Arrotondamento unico e "come su carta" (uguale a LaTeX)', () => {
+  assert.equal(N.formatNumero(1.005), '1,01');
+  assert.equal(N.formatNumero(8.0459770, 1), '8,0');
+  assert.equal(N.formatPercentuale(7 / 87 * 100), '+8,0%');
+  assert.equal(N.formatNumero(2.675), '2,68');
+  assert.equal(N.formatBreve(-193750000, true), '−193,8 mln');
+  assert.equal(N.formatBreve(26000, true), '+26.000');
+});

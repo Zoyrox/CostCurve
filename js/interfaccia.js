@@ -220,7 +220,7 @@
       $('#report').hidden = true;
       $('#codice-latex').value = '';
     }
-    $$('#btn-tex, #btn-pdf, #btn-copia, #btn-overleaf, #btn-stampa').forEach(b => b.setAttribute('aria-disabled', String(!modello.valido)));
+    $$('#btn-tex, #btn-pdf, #btn-copia, #btn-overleaf, #btn-stampa, #btn-svg').forEach(b => b.setAttribute('aria-disabled', String(!modello.valido)));
     salvaNelBrowser();
   }
 
@@ -469,6 +469,11 @@
       }
     });
     $('#btn-stampa').addEventListener('click', () => { if (serveValido()) window.print(); });
+    $('#btn-svg').addEventListener('click', () => {
+      if (!serveValido()) return;
+      scarica(latex.nomeFile(modello.titolo).replace(/\.tex$/, '.svg'), svgCorrente, 'image/svg+xml');
+      messaggioAzione('Grafico scaricato in formato SVG (vettoriale: si apre con il browser o con Inkscape).', 'ok');
+    });
     $('#btn-overleaf').addEventListener('click', () => {
       if (!serveValido()) return;
       const form = document.createElement('form');

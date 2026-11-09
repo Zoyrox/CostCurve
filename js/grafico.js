@@ -157,12 +157,17 @@
       const p = m.previsione, xe = X(p.durataPrevista), ye = Y(p.eac);
       s += riquadro(xe, ye, `EAC (costo finale stimato): ${fN(p.eac)}`);
       s += `<text x="${r2(xe + 10)}" y="${r2(ye + 4)}" font-size="11" fill="${COLORI.inchiostro}"><tspan font-weight="bold">EAC</tspan> ${esc(numeri.formatBreve(p.eac))}</text>`;
-      const marcatore = (xm, colore, riga1, riga2) =>
+      const marcatore = (xm, colore, riga1, riga2, anchor) =>
         linea(xm, T + PH + 52, xm, T + PH + 32, colore, 1.6) + punta(xm, T + PH + 25, -Math.PI / 2, colore, 8, 7)
-        + testo(xm, T + PH + 66, riga1, { size: 10.5, bold: true, anchor: 'middle', colore })
-        + testo(xm, T + PH + 79, riga2, { size: 10.5, bold: true, anchor: 'middle', colore });
-      s += marcatore(X(m.durata), COLORI.bcws, 'Fine', 'pianificata');
-      s += marcatore(xe, COLORI.acwp, 'Fine', 'stimata');
+        + testo(xm, T + PH + 66, riga1, { size: 10.5, bold: true, anchor, colore })
+        + testo(xm, T + PH + 79, riga2, { size: 10.5, bold: true, anchor, colore });
+      // se le due date sono vicine, le scritte si allontanano (come nel .tex)
+      let ancP = 'middle', ancS = 'middle';
+      if (Math.abs(p.durataPrevista - m.durata) / xmax < 0.08) {
+        if (p.durataPrevista < m.durata) { ancP = 'start'; ancS = 'end'; } else { ancP = 'end'; ancS = 'start'; }
+      }
+      s += marcatore(X(m.durata), COLORI.bcws, 'Fine', 'pianificata', ancP);
+      s += marcatore(xe, COLORI.acwp, 'Fine', 'stimata', ancS);
       fondo = T + PH + 92;
     }
 

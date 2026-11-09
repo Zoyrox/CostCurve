@@ -100,6 +100,8 @@
 \cs_new:Npn \cc_v:n #1 { \tl_use:c { g_cc_ #1 _tl } }
 % valore arrotondato a 2 decimali (come si stampa): siunitx va in errore se deve arrotondare numeri lunghi
 \cs_new:Npn \cc_r:n #1 { \fp_eval:n { round( \cc_v:n { #1 } , 2 ) } }
+% arrotondamento UNICO alle cifre mostrate (evita il doppio arrotondamento 8,0459 -> 8,05 -> 8,1)
+\cs_new:Npn \cc_r:nn #1 #2 { \fp_eval:n { round( \cc_v:n { #1 } , #2 ) } }
 \cs_new_protected:Npn \cc_set:nn #1 #2 { \tl_gset:cx { g_cc_ #1 _tl } {#2} }
 \fp_new:N \l_cc_a_fp
 \fp_new:N \l_cc_b_fp
@@ -344,7 +346,7 @@
     \int_compare:nNnTF { \cc_v:n { haperc #2 } } = { 1 }
       {
         \fp_compare:nNnT { \cc_v:n { #1 #2 } } > { 0 } { + }
-        \num [ round-precision = 1 , drop-zero-decimal = false ] { \cc_r:n { #1 #2 } } \,\%
+        \num [ round-precision = 1 , drop-zero-decimal = false ] { \cc_r:nn { #1 #2 } { 1 } } \,\%
       }
       { n.d. }
   }
@@ -355,7 +357,7 @@
 \cs_new_protected:Npn \cc_quanto:nn #1 #2
   {
     \int_compare:nNnTF { \cc_v:n { haperc #2 } } = { 1 }
-      { \num [ round-precision = 1 , drop-zero-decimal = false ] { \fp_eval:n { round( abs( \cc_v:n { p #1 #2 } ) , 2 ) } } \% }
+      { \num [ round-precision = 1 , drop-zero-decimal = false ] { \fp_eval:n { round( abs( \cc_v:n { p #1 #2 } ) , 1 ) } } \% }
       { \num { \fp_eval:n { round( abs( \cc_v:n { #1 #2 } ) , 2 ) } } }
   }
 \cs_new_protected:Npn \CCfrasi #1
@@ -517,14 +519,20 @@
 \CCdisegnaRilevamento{A}{1}{0.93}
 \edef\ccAlt{\fpeval{(\CCv{tB}-\CCv{tA})/\CCv{xmax} < 0.18 ? 0.80 : 0.93}}
 \CCdisegnaRilevamento{B}{2}{\ccAlt}
-% previsione: EAC e date di fine
+% previsione: EAC e date di fine (se le due date sono vicine, le scritte si allontanano)
+\def\ccAncP{north}\def\ccAncS{north}
+\CCprevisione{%
+  \ifdim\fpeval{abs(\CCv{fine}-\Durata)/\CCv{xmax}}pt<0.08pt
+    \ifdim\fpeval{\CCv{fine}-\Durata}pt<0pt \def\ccAncP{north west}\def\ccAncS{north east}%
+    \else \def\ccAncP{north east}\def\ccAncS{north west}\fi
+  \fi}{}
 \CCprevisione{%
   \node[ccriquadro] at (\CCv{fine},\CCv{eac}) {};
   \node[ccetichetta, anchor=west, xshift=4pt] at (\CCv{fine},\CCv{eac}) {EAC \mdseries\CCbreve{eac}};
   \draw[ccBCWS, line width=1pt, -{Stealth[length=5pt]}] ([yshift=-11mm]axis cs:\Durata,0) -- ([yshift=-6.5mm]axis cs:\Durata,0);
-  \node[font=\scriptsize\bfseries, text=ccBCWS, anchor=north, align=center] at ([yshift=-11mm]axis cs:\Durata,0) {Fine\\pianificata};
+  \node[font=\scriptsize\bfseries, text=ccBCWS, anchor=\ccAncP, align=center] at ([yshift=-11mm]axis cs:\Durata,0) {Fine\\pianificata};
   \draw[ccACWP, line width=1pt, -{Stealth[length=5pt]}] ([yshift=-11mm]axis cs:\CCv{fine},0) -- ([yshift=-6.5mm]axis cs:\CCv{fine},0);
-  \node[font=\scriptsize\bfseries, text=ccACWP, anchor=north, align=center] at ([yshift=-11mm]axis cs:\CCv{fine},0) {Fine\\stimata};
+  \node[font=\scriptsize\bfseries, text=ccACWP, anchor=\ccAncS, align=center] at ([yshift=-11mm]axis cs:\CCv{fine},0) {Fine\\stimata};
 }{}
 \end{axis}
 \end{tikzpicture}
@@ -576,7 +584,7 @@ Stato & \CCsemaforo{A} & \CCsemaforo{B} \\
 \begin{small}
 \textbf{Rilevamento 1} (\UnitaTempoSingolare~\CCv{tA}): \CCfrasi{A}\par
 \textbf{Rilevamento 2} (\UnitaTempoSingolare~\CCv{tB}): \CCfrasi{B}\par
-\CCprevisione{\textbf{Previsione} \textit{(assunzione, dal rilevamento 2)}: costo finale stimato EAC $=$ \num{\CCr{eac}} contro un budget di \num{\fpeval{round(\BAC,2)}}; fine stimata al \UnitaTempoSingolare~\num[round-precision=1,drop-zero-decimal=false]{\CCr{fine}} contro \Durata~pianificati.\par}{}
+\CCprevisione{\textbf{Previsione} \textit{(assunzione, dal rilevamento 2)}: costo finale stimato EAC $=$ \num{\CCr{eac}} contro un budget di \num{\fpeval{round(\BAC,2)}}; fine stimata al \UnitaTempoSingolare~\num[round-precision=1,drop-zero-decimal=false]{\fpeval{round(\CCv{fine},1)}} contro \Durata~pianificati.\par}{}
 \end{small}
 
 % ---------------------------------------------------------------------

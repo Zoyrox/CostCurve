@@ -1,0 +1,34 @@
+{
+  "formato": "costcurve",
+  "versione": 1,
+  "titolo": "Planned Value (S curve) - pag. 198",
+  "unitaTempo": "settimane",
+  "unitaMoneta": "euro",
+  "durata": 9,
+  "bac": 150,
+  "costiPeriodo": [
+    5,
+    5,
+    15,
+    30,
+    30,
+    35,
+    10,
+    10,
+    10
+  ],
+  "rilevamenti": [
+    {
+      "periodo": 4,
+      "bcwp": 50,
+      "acwp": 60
+    },
+    {
+      "periodo": 7,
+      "bcwp": 120,
+      "acwp": 140
+    }
+  ],
+  "mostraPrevisione": true,
+  "nota": "Piano: dati del libro (pag. 198). Rilevamenti: dati inventati."
+}

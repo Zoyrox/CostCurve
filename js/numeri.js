@@ -30,6 +30,16 @@
     return Number(s);
   }
 
+  /**
+   * Arrotonda a d decimali "come su carta" (metà per eccesso), correggendo
+   * i piccoli errori dei numeri binari: 1,005 -> 1,01 (non 1,00) e
+   * 8,0459 -> 8,0. Stesso risultato dell'arrotondamento decimale di LaTeX.
+   */
+  function arrotonda(x, d) {
+    const p = Math.pow(10, d);
+    return Math.round(Number((x * p).toPrecision(15))) / p;
+  }
+
   /** Raggruppa le cifre intere con il punto: 540000 -> "540.000". */
   function raggruppa(cifre) {
     return cifre.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -44,9 +54,9 @@
     if (x === null || x === undefined || !Number.isFinite(x)) return 'n.d.';
     let d = decimali;
     if (d === undefined || d === 'auto') {
-      d = Math.abs(Math.round(x * 100) % 100) === 0 ? 0 : 2;
+      d = Math.round(arrotonda(Math.abs(x), 2) * 100) % 100 === 0 ? 0 : 2;
     }
-    const arrotondato = Math.round(Math.abs(x) * Math.pow(10, d)) / Math.pow(10, d);
+    const arrotondato = arrotonda(Math.abs(x), d);
     const [intera, frazione] = arrotondato.toFixed(d).split('.');
     const segno = x < 0 && arrotondato !== 0 ? '−' : '';
     return segno + raggruppa(intera) + (frazione ? ',' + frazione : '');
