@@ -1,0 +1,11 @@
+{
+  "name": "costcurve",
+  "version": "1.0.0",
+  "description": "Strumento web per il diagramma costi-tempi (BCWS, BCWP, ACWP) con export LaTeX",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "license": "MIT"
+}
