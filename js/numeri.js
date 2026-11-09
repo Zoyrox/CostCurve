@@ -65,6 +65,21 @@
     return (x > 0 && s !== '0' ? '+' : '') + s;
   }
 
+  /**
+   * Forma breve per le etichette dentro il grafico (spazio poco):
+   * da un milione in su "193,8 mln", da un miliardo "1,1 mld".
+   * Nelle tabelle si usa sempre il numero completo.
+   */
+  function formatBreve(x, conSegno) {
+    if (!Number.isFinite(x)) return 'n.d.';
+    const a = Math.abs(x);
+    let s;
+    if (a >= 1e9) s = formatNumero(x / 1e9, 1) + ' mld';
+    else if (a >= 1e6) s = formatNumero(x / 1e6, 1) + ' mln';
+    else s = formatNumero(x);
+    return (conSegno && x > 0 && !/^0(,0)?( |$)/.test(s) ? '+' : '') + s;
+  }
+
   /** Numero per il file .tex: punto decimale, nessun separatore, max 6 decimali. */
   function perLatex(x) {
     if (!Number.isFinite(x)) return '0';
@@ -72,7 +87,7 @@
     return String(r);
   }
 
-  const api = { leggiNumero, formatNumero, formatPercentuale, formatConSegno, perLatex };
+  const api = { leggiNumero, formatNumero, formatPercentuale, formatConSegno, formatBreve, perLatex };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else { radice.CC = radice.CC || {}; radice.CC.numeri = api; }
 })(typeof globalThis !== 'undefined' ? globalThis : this);

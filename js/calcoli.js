@@ -167,6 +167,21 @@
     return 10000;
   }
 
+  /**
+   * Posizioni verticali delle tre etichette di un rilevamento, nell'ordine
+   * [ACWP, BCWS, BCWP]. Si ordinano i valori (a parità vince l'ordine
+   * dell'elenco) e si spingono verso l'alto quelle troppo vicine, con
+   * distanza minima "gap". Stesso algoritmo nel file .tex.
+   */
+  function posizioniEtichette(valori, gap) {
+    const rango = valori.map((v, i) => valori.filter((w, j) => w < v || (w === v && j < i)).length);
+    const ordinati = [];
+    valori.forEach((v, i) => { ordinati[rango[i]] = v; });
+    const y = [ordinati[0]];
+    for (let k = 1; k < ordinati.length; k++) y.push(Math.max(ordinati[k], y[k - 1] + gap));
+    return rango.map(r => y[r]);
+  }
+
   // ---- Interpretazione a parole ---------------------------------------
   const segno = v => (Math.abs(v) < EPS ? 0 : v > 0 ? 1 : -1);
 
@@ -325,7 +340,11 @@
     const ymax = Math.ceil(yDati * 1.15 / ystep - EPS) * ystep;
     const xDati = Math.max(n, prev.visibile ? prev.durataPrevista : 0);
     modello.assi = { xDati, xmax: xDati * 1.14, xstep: passoTempo(xDati), yDati, ymax, ystep };
-    modello.frecce = { offSV: 0.045 * modello.assi.xmax, offCV: 0.10 * modello.assi.xmax };
+    modello.frecce = { offSV: 0.045 * modello.assi.xmax, offCV: 0.13 * modello.assi.xmax };
+    // Etichette dei punti (ACWP, BCWS, BCWP) distanziate se i valori sono vicini
+    for (const r of modello.rilevamenti) r.etichette = posizioniEtichette([r.acwp, r.bcws, r.bcwp], 0.05 * ymax);
+    // Se i due rilevamenti sono vicini, l'etichetta del secondo scende un po'
+    modello.frecce.altEtichetta = [0.93, (r2.periodo - r1.periodo) / modello.assi.xmax < 0.18 ? 0.80 : 0.93];
     modello.problemi = problemi;
     return modello;
   }
@@ -333,7 +352,7 @@
   const api = {
     DURATA_MAX, SOGLIA_CRITICA, UNITA_TEMPO, UNITA_MONETA,
     datiVuoti, normalizza, adattaCosti, generaCurvaS, caratteriNonSupportati,
-    tangenti, bezierMonotona, passoBello, passoTempo, calcola,
+    tangenti, bezierMonotona, passoBello, passoTempo, posizioniEtichette, calcola,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else { radice.CC = radice.CC || {}; radice.CC.calcoli = api; }
