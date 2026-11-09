@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CostCurve — diagramma costi-tempi</title>
+  <meta name="description" content="Inserisci il piano a budget e due rilevamenti: ottieni subito il diagramma costi-tempi (BCWS, BCWP, ACWP), gli indicatori CV e SV e il file LaTeX.">
+  <meta name="theme-color" content="#1B2A3A">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231B2A3A'/%3E%3Cpath d='M6 25 C 14 25, 15 8, 26 7' fill='none' stroke='%23F6F3EC' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M6 25 C 15 25, 18 15, 26 13' fill='none' stroke='%23E07B39' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/stile.css">
+  <link rel="stylesheet" href="css/stampa.css" media="print">
+</head>
+<body>
+<a class="salta" href="#editor">Vai ai dati del progetto</a>
+
+<!-- ================= TESTATA ================= -->
+<header class="testata">
+  <div class="marchio">
+    <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+      <rect width="40" height="40" rx="9" fill="#F6F3EC" fill-opacity=".08"/>
+      <path d="M7 32 H34 M7 32 V6" stroke="#F6F3EC" stroke-opacity=".45" stroke-width="1.6" fill="none"/>
+      <path d="M8 31 C 18 31, 19 9, 33 8" fill="none" stroke="#F6F3EC" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M8 31 C 19 31, 23 19, 33 17" fill="none" stroke="#E07B39" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="5 3"/>
+    </svg>
+    <div>
+      <p class="nome">CostCurve</p>
+      <p class="motto">Diagramma costi-tempi in 4 passi, con il file LaTeX pronto</p>
+    </div>
+  </div>
+  <nav class="azioni" aria-label="Azioni sul progetto">
+    <div class="gruppo-esempi">
+      <label for="scelta-esempio" class="nascosto">Carica un esempio</label>
+      <select id="scelta-esempio">
+        <option value="">Carica esempio…</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn-chiaro" id="btn-nuovo">Nuovo progetto</button>
+    <button type="button" class="btn btn-chiaro" id="btn-apri">Apri progetto</button>
+    <button type="button" class="btn btn-chiaro" id="btn-salva">Salva progetto</button>
+    <input type="file" id="file-apri" accept=".json,application/json" hidden>
+  </nav>
+  <p class="privacy">🔒 I dati restano nel tuo browser: nessun dato viene inviato in rete.</p>
+</header>
+
+<div class="avviso-esempio" id="avviso-esempio" hidden>
+  <p><strong>Stai guardando un esempio.</strong> <span id="avviso-esempio-testo"></span></p>
+  <button type="button" class="btn btn-piccolo" id="btn-nuovo-2">Inizia un progetto vuoto</button>
+</div>
+
+<!-- ================= AREA DI LAVORO ================= -->
+<main class="lavoro">
+  <section class="editor" id="editor" aria-label="Dati del progetto">
+    <div class="passi" role="tablist" aria-label="Passi">
+      <button type="button" role="tab" class="passo" id="tab-1" aria-controls="passo-1" aria-selected="true"><span class="num">1</span><span class="etichetta">Progetto</span></button>
+      <button type="button" role="tab" class="passo" id="tab-2" aria-controls="passo-2" aria-selected="false" tabindex="-1"><span class="num">2</span><span class="etichetta">Piano a budget</span></button>
+      <button type="button" role="tab" class="passo" id="tab-3" aria-controls="passo-3" aria-selected="false" tabindex="-1"><span class="num">3</span><span class="etichetta">Rilevamenti</span></button>
+      <button type="button" role="tab" class="passo" id="tab-4" aria-controls="passo-4" aria-selected="false" tabindex="-1"><span class="num">4</span><span class="etichetta">Risultati</span></button>
+    </div>
+
+    <!-- ---------- PASSO 1: PROGETTO ---------- -->
+    <div class="pannello" role="tabpanel" id="passo-1" aria-labelledby="tab-1">
+      <h2>Il progetto</h2>
+      <p class="intro">Poche informazioni generali. Servono per il titolo, le unità di misura e la scala del diagramma.</p>
+
+      <div class="campo" data-campo="titolo">
+        <label for="f-titolo">Titolo del progetto</label>
+        <input id="f-titolo" type="text" maxlength="120" autocomplete="off" placeholder="es. Nuovo gestionale di magazzino">
+        <details class="aiuto"><summary>Cosa scrivo qui?</summary><p>Il nome del progetto che stai monitorando. Comparirà in cima al diagramma e al file LaTeX. Esempio: <em>Rifacimento sito aziendale</em>.</p></details>
+        <p class="msg" id="msg-titolo" aria-live="polite"></p>
+      </div>
+
+      <div class="riga-2">
+        <fieldset class="campo">
+          <legend>Unità di tempo</legend>
+          <div class="segmenti">
+            <input type="radio" name="unitaTempo" id="ut-giorni" value="giorni"><label for="ut-giorni">Giorni</label>
+            <input type="radio" name="unitaTempo" id="ut-settimane" value="settimane"><label for="ut-settimane">Settimane</label>
+            <input type="radio" name="unitaTempo" id="ut-mesi" value="mesi"><label for="ut-mesi">Mesi</label>
+          </div>
+        </fieldset>
+        <fieldset class="campo">
+          <legend>Unità dei costi</legend>
+          <div class="segmenti">
+            <input type="radio" name="unitaMoneta" id="um-euro" value="euro"><label for="um-euro">Euro</label>
+            <input type="radio" name="unitaMoneta" id="um-migliaia" value="migliaia"><label for="um-migliaia">Migliaia di €</label>
+          </div>
+        </fieldset>
+      </div>
+      <details class="aiuto aiuto-largo"><summary>Come scelgo le unità?</summary><p>L'unità di tempo è il "passo" del piano: se il progetto dura 23 mesi scegli <em>Mesi</em>. L'unità dei costi è come scriverai tutti gli importi: con <em>Migliaia di €</em> scrivi 540 invece di 540.000.</p></details>
+
+      <div class="riga-2">
+        <div class="campo" data-campo="durata">
+          <label for="f-durata">Durata pianificata <span class="unita" data-unita-tempo>(mesi)</span></label>
+          <input id="f-durata" type="number" min="1" max="120" step="1" inputmode="numeric">
+          <details class="aiuto"><summary>Cosa scrivo qui?</summary><p>Quanti periodi dura il progetto secondo il piano, da 1 a 120. Esempio del libro: <em>23</em> mesi.</p></details>
+          <p class="msg" id="msg-durata" aria-live="polite"></p>
+        </div>
+        <div class="campo" data-campo="bac">
+          <label for="f-bac">Budget totale <abbr title="Budget At Completion">(BAC)</abbr></label>
+          <input id="f-bac" type="text" inputmode="decimal" autocomplete="off" placeholder="es. 540.000">
+          <details class="aiuto"><summary>Cosa scrivo qui?</summary><p>Il costo totale previsto del progetto. Puoi scrivere 540000 o 540.000. Esempio del libro: <em>540.000</em> euro.</p></details>
+          <p class="msg" id="msg-bac" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="f-nota">Nota <span class="facoltativo">facoltativa</span></label>
+        <input id="f-nota" type="text" maxlength="200" autocomplete="off" placeholder="es. dati del 2° trimestre, fonte: ufficio acquisti">
+        <p class="aiuto-breve">Comparirà sotto il titolo. Utile per indicare la fonte dei dati.</p>
+      </div>
+    </div>
+
+    <!-- ---------- PASSO 2: PIANO A BUDGET ---------- -->
+    <div class="pannello" role="tabpanel" id="passo-2" aria-labelledby="tab-2" hidden>
+      <h2>Piano a budget <span class="sigla">BCWS</span></h2>
+      <p class="intro">Per ogni periodo scrivi <strong>quanto prevedi di spendere in quel periodo</strong>. Il programma somma i valori: il totale progressivo è la curva <em>Pianificato a budget (BCWS)</em>.</p>
+
+      <div class="barra-strumenti">
+        <button type="button" class="btn btn-secondario" id="btn-curva-s">Genera una curva a S dal budget</button>
+        <button type="button" class="btn btn-testo" id="btn-azzera-piano">Svuota il piano</button>
+      </div>
+      <details class="aiuto aiuto-largo"><summary>Cosa fa "Genera una curva a S"?</summary><p>Distribuisce il budget totale sui periodi con la tipica forma a S: pochi costi all'inizio, il grosso a metà, pochi alla fine. È un punto di partenza: poi puoi correggere ogni valore. Suggerimento: puoi anche <strong>incollare</strong> una colonna di numeri copiata da un foglio di calcolo nel primo campo.</p></details>
+
+      <div class="somma" id="somma-piano" aria-live="polite"></div>
+      <p class="msg" id="msg-piano" aria-live="polite"></p>
+
+      <div class="tabella-piano-contenitore">
+        <table class="tabella-piano">
+          <caption class="nascosto">Costo pianificato per periodo e totale progressivo</caption>
+          <thead><tr><th scope="col" data-unita-tempo-sing>Mese</th><th scope="col">Costo nel periodo</th><th scope="col">BCWS cumulato</th></tr></thead>
+          <tbody id="righe-piano"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ---------- PASSO 3: RILEVAMENTI ---------- -->
+    <div class="pannello" role="tabpanel" id="passo-3" aria-labelledby="tab-3" hidden>
+      <h2>I due rilevamenti</h2>
+      <p class="intro">Un rilevamento è una "fotografia" del progetto in un certo periodo. Per ciascuno scrivi due valori cumulati, cioè dall'inizio del progetto fino a quel periodo.</p>
+
+      <div class="rilevamenti">
+        <fieldset class="scheda-ril" data-ril="0">
+          <legend>Rilevamento 1</legend>
+          <div class="campo" data-campo="ril-0-periodo">
+            <label for="f-ril-0-periodo">Alla fine del <span data-unita-tempo-sing-min>mese</span></label>
+            <input id="f-ril-0-periodo" type="number" min="1" step="1" inputmode="numeric">
+            <p class="msg" id="msg-ril-0-periodo" aria-live="polite"></p>
+          </div>
+          <p class="letto">Pianificato a budget <span class="sigla">BCWS</span>: <output id="out-ril-0-bcws">—</output> <span class="nota-letto">letto dal piano</span></p>
+          <div class="campo" data-campo="ril-0-bcwp">
+            <label for="f-ril-0-bcwp">Lavoro svolto a costi di budget <span class="sigla">BCWP</span></label>
+            <input id="f-ril-0-bcwp" type="text" inputmode="decimal" autocomplete="off">
+            <details class="aiuto"><summary>Cosa scrivo qui?</summary><p>Quanto <em>vale</em>, ai prezzi del piano, il lavoro davvero completato. Se hai finito attività che a budget costavano 140.000 €, scrivi 140.000 (anche se le hai pagate di più).</p></details>
+            <p class="msg" id="msg-ril-0-bcwp" aria-live="polite"></p>
+          </div>
+          <div class="campo" data-campo="ril-0-acwp">
+            <label for="f-ril-0-acwp">Costo effettivamente sostenuto <span class="sigla">ACWP</span></label>
+            <input id="f-ril-0-acwp" type="text" inputmode="decimal" autocomplete="off">
+            <details class="aiuto"><summary>Cosa scrivo qui?</summary><p>Quanto hai <em>speso davvero</em> fino a quel periodo, dalle fatture e dalle ore pagate. Esempio del libro: 180.000 €.</p></details>
+            <p class="msg" id="msg-ril-0-acwp" aria-live="polite"></p>
+          </div>
+        </fieldset>
+
+        <fieldset class="scheda-ril" data-ril="1">
+          <legend>Rilevamento 2</legend>
+          <div class="campo" data-campo="ril-1-periodo">
+            <label for="f-ril-1-periodo">Alla fine del <span data-unita-tempo-sing-min>mese</span></label>
+            <input id="f-ril-1-periodo" type="number" min="1" step="1" inputmode="numeric">
+            <p class="msg" id="msg-ril-1-periodo" aria-live="polite"></p>
+          </div>
+          <p class="letto">Pianificato a budget <span class="sigla">BCWS</span>: <output id="out-ril-1-bcws">—</output> <span class="nota-letto">letto dal piano</span></p>
+          <div class="campo" data-campo="ril-1-bcwp">
+            <label for="f-ril-1-bcwp">Lavoro svolto a costi di budget <span class="sigla">BCWP</span></label>
+            <input id="f-ril-1-bcwp" type="text" inputmode="decimal" autocomplete="off">
+            <p class="msg" id="msg-ril-1-bcwp" aria-live="polite"></p>
+          </div>
+          <div class="campo" data-campo="ril-1-acwp">
+            <label for="f-ril-1-acwp">Costo effettivamente sostenuto <span class="sigla">ACWP</span></label>
+            <input id="f-ril-1-acwp" type="text" inputmode="decimal" autocomplete="off">
+            <p class="msg" id="msg-ril-1-acwp" aria-live="polite"></p>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="interruttore">
+        <input type="checkbox" id="f-previsione">
+        <label for="f-previsione">Mostra la previsione: costo finale stimato <abbr title="Estimate At Completion">(EAC)</abbr> e fine stimata</label>
+      </div>
+      <p class="aiuto-breve">La previsione è un'<strong>assunzione</strong>, non è nel libro: EAC = BAC / CPI e fine = durata / SPI, calcolati con l'ultimo rilevamento.</p>
+    </div>
+
+    <!-- ---------- PASSO 4: RISULTATI ---------- -->
+    <div class="pannello" role="tabpanel" id="passo-4" aria-labelledby="tab-4" hidden>
+      <h2>Risultati</h2>
+      <div id="riepilogo-risultati" aria-live="polite"></div>
+
+      <h3>Scarica e condividi</h3>
+      <div class="download">
+        <button type="button" class="btn btn-primario" id="btn-tex">
+          <span class="ico" aria-hidden="true">⤓</span> Scarica il file .tex
+        </button>
+        <button type="button" class="btn btn-secondario" id="btn-pdf">
+          <span class="ico" aria-hidden="true">⤓</span> Scarica PDF
+        </button>
+        <button type="button" class="btn btn-secondario" id="btn-stampa">Stampa / Salva come PDF</button>
+        <button type="button" class="btn btn-secondario" id="btn-copia">Copia il codice LaTeX</button>
+        <button type="button" class="btn btn-secondario" id="btn-overleaf">Apri in Overleaf ↗</button>
+      </div>
+      <p class="msg-azione" id="msg-azione" role="status" aria-live="polite"></p>
+      <p class="aiuto-breve">Il <strong>file .tex</strong> è l'output ufficiale: si compila con pdflatex o su Overleaf, ed è parametrico (cambi i numeri nella sezione DATI e ricompili). Il <strong>PDF del sito</strong> è un report generato dal browser con gli stessi dati e calcoli. "Apri in Overleaf" invia il file .tex al sito overleaf.com.</p>
+
+      <details class="codice">
+        <summary>Mostra il codice LaTeX</summary>
+        <label for="codice-latex" class="nascosto">Codice LaTeX generato</label>
+        <textarea id="codice-latex" readonly spellcheck="false" rows="14"></textarea>
+      </details>
+    </div>
+
+    <div class="nav-passi">
+      <button type="button" class="btn btn-testo" id="btn-indietro">← Indietro</button>
+      <button type="button" class="btn btn-primario" id="btn-avanti">Avanti →</button>
+    </div>
+  </section>
+
+  <!-- ---------- ANTEPRIMA ---------- -->
+  <aside class="anteprima" aria-label="Anteprima del diagramma">
+    <div class="foglio">
+      <div class="foglio-testa">
+        <p class="foglio-etichetta">Anteprima dal vivo</p>
+        <p class="foglio-titolo" id="anteprima-titolo">—</p>
+      </div>
+      <div class="problemi" id="problemi" aria-live="polite"></div>
+      <div class="grafico" id="grafico"></div>
+      <div class="semafori" id="semafori"></div>
+    </div>
+  </aside>
+</main>
+
+<!-- ================= REPORT (anche per la stampa) ================= -->
+<section class="report" id="report" aria-label="Report completo"></section>
+
+<footer class="piede">
+  <p>CostCurve · progetto GPOI · formule dal libro di testo (pagg. 198-199). Il PDF del sito è un report generato dal browser; il PDF "ufficiale" si ottiene compilando il file .tex scaricato.</p>
+  <p>Funziona anche offline. Librerie incluse: jsPDF e svg2pdf.js (licenza MIT), solo per "Scarica PDF".</p>
+</footer>
+
+<!-- Script classici (non moduli ES): così il sito funziona anche aperto con un doppio clic -->
+<script src="js/numeri.js"></script>
+<script src="js/calcoli.js"></script>
+<script src="js/esempi.js"></script>
+<script src="js/grafico.js"></script>
+<script src="js/latex.js"></script>
+<script src="js/report.js"></script>
+<script src="vendor/jspdf-4.2.1.umd.min.js" defer></script>
+<script src="vendor/svg2pdf-2.9.0.umd.min.js" defer></script>
+<script src="js/pdf.js" defer></script>
+<script src="js/interfaccia.js" defer></script>
+</body>
+</html>
