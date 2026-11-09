@@ -1,0 +1,48 @@
+{
+  "formato": "costcurve",
+  "versione": 1,
+  "titolo": "Esempio del libro (pag. 199)",
+  "unitaTempo": "mesi",
+  "unitaMoneta": "euro",
+  "durata": 23,
+  "bac": 540000,
+  "costiPeriodo": [
+    4000,
+    6000,
+    8000,
+    11000,
+    14000,
+    17000,
+    21000,
+    25000,
+    28000,
+    32000,
+    35000,
+    38000,
+    40000,
+    41000,
+    40000,
+    38000,
+    35000,
+    31000,
+    26000,
+    20000,
+    14000,
+    10000,
+    6000
+  ],
+  "rilevamenti": [
+    {
+      "periodo": 10,
+      "bcwp": 140000,
+      "acwp": 180000
+    },
+    {
+      "periodo": 16,
+      "bcwp": 330000,
+      "acwp": 420000
+    }
+  ],
+  "mostraPrevisione": true,
+  "nota": "Rilevamento 1: dati del libro (pag. 199). Piano mensile e rilevamento 2: dati inventati."
+}

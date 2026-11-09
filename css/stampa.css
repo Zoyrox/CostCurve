@@ -1,0 +1,31 @@
+/* =====================================================================
+ * stampa.css — "Stampa / Salva come PDF" (livello base, zero librerie)
+ * Si stampa solo il report: titolo, grafico, indicatori, frasi,
+ * legenda e tabella costi-tempi, su fogli A4.
+ * ===================================================================== */
+@page { size: A4; margin: 14mm 13mm 15mm; }
+
+html, body { background: #fff !important; }
+body { font-size: 9.5pt; color: #000; }
+.testata, .avviso-esempio, .lavoro, .piede, .salta { display: none !important; }
+
+.report { display: block !important; max-width: none; padding: 0; margin: 0; }
+.report-testa { margin-top: 0; padding-top: 3mm; border-top-width: 2.5pt; border-top-color: #D55E00; }
+.report-titolo { font-size: 18pt; }
+.solo-stampa { display: block !important; }
+.report-grafico { margin: 3mm 0 0; break-inside: avoid; }
+.report-grafico svg { width: 100%; height: auto; max-height: 150mm; }
+.report-griglia { display: block; }
+.report-griglia section { break-inside: avoid; }
+.report h3 { font-size: 12pt; margin-top: 5mm; break-after: avoid; }
+.tabella-indicatori, .tabella-costi { font-size: 8.5pt; }
+.tabella-indicatori th, .tabella-indicatori td, .tabella-costi th, .tabella-costi td { padding: 1.2mm 2mm; }
+.tabella-costi thead { display: table-header-group; }   /* intestazione ripetuta su ogni pagina */
+.tabella-costi tr { break-inside: avoid; }
+.scorri { overflow: visible; }
+.legenda > div { break-inside: avoid; padding: 1mm 0; }
+.frase, .legenda dd, .report-note p { font-size: 9pt; }
+.semaforo, .tag, .tabella-costi tr.ril, .tabella-indicatori thead th, .tabella-costi thead th, .frase.previsione {
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+a[href]::after { content: ""; }

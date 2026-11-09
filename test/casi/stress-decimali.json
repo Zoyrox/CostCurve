@@ -1,0 +1,1 @@
+{"titolo":"Senza previsione, valori decimali","unitaTempo":"giorni","unitaMoneta":"migliaia","durata":5,"bac":2.5,"costiPeriodo":[0.2,0.6,0.9,0.5,0.3],"rilevamenti":[{"periodo":2,"bcwp":0.8,"acwp":0.8},{"periodo":3,"bcwp":1.7,"acwp":1.6}],"mostraPrevisione":false,"nota":""}
