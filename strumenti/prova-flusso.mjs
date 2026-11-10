@@ -86,13 +86,61 @@ ok(tt.includes('rilevamento 1') && tt.includes('5,35'), 'Mouse sul mese 5: riqua
 await p.screenshot({ path: `${out}/flusso-tooltip.png` });
 await p.click('#z-adatta');
 
-// --- mostra / nascondi
-await p.click('#b-mostra');
-await p.uncheck('[data-mostra="bcwp"]');
+// --- legenda cliccabile: nascondi e mostra BCWP
+await p.click('[data-curva="bcwp"]');
 await attesa();
-ok(!(await p.innerHTML('#grafico')).includes('Lavoro svolto a costi di budget (BCWP)</title>'), 'Mostra: la curva BCWP si può nascondere');
-await p.check('[data-mostra="bcwp"]');
+ok((await p.getAttribute('[data-curva="bcwp"]', 'aria-pressed')) === 'false', 'Legenda: un clic nasconde la curva BCWP');
+await p.click('[data-curva="bcwp"]');
+await attesa();
+
+// --- navigatore: trascinando il riquadro ci si sposta nel tempo
+await p.click('#z-piu'); await p.click('#z-piu');
+await attesa();
+const prima = await p.textContent('#grafico-sottotitolo');
+const nb = await p.locator('#navigatore svg .finestra-zoom').boundingBox();
+await p.mouse.move(nb.x + nb.width / 2, nb.y + nb.height / 2);
+await p.mouse.down(); await p.mouse.move(nb.x + nb.width / 2 + 120, nb.y + nb.height / 2, { steps: 5 }); await p.mouse.up();
+await attesa();
+ok((await p.textContent('#grafico-sottotitolo')) !== prima, 'Navigatore: trascinando il riquadro la vista si sposta');
+await p.click('#z-adatta');
+
+// --- note sul grafico
+await p.click('#tab-3');
+await p.click('#dettagli-note summary');
+await p.click('#btn-aggiungi-nota');
+await p.fill('#f-nota-0-periodo', '3');
+await p.fill('#f-nota-0-testo', 'Ritardo del fornitore');
+await attesa();
+ok((await p.innerHTML('#grafico')).includes('Ritardo del fornitore'), 'Note: la nota compare sul grafico');
+
+// --- annulla e ripristina
+await p.waitForTimeout(600);
+await p.click('#btn-annulla');
+await attesa();
+ok(!(await p.innerHTML('#grafico')).includes('Ritardo del fornitore'), 'Annulla: la nota sparisce');
+await p.click('#btn-ripristina');
+await attesa();
+ok((await p.innerHTML('#grafico')).includes('Ritardo del fornitore'), 'Ripristina: la nota torna');
+
+// --- cruscotto e sintesi
+ok((await p.textContent('#cruscotto')).includes('Costo finale stimato'), 'Cruscotto: costo finale e fine stimata');
+await p.click('#tab-4');
+ok((await p.textContent('#testo-sintesi')).startsWith('Al mese 5 il progetto è in ritardo'), 'Sintesi: frase automatica');
+
+// --- link da condividere (codifica e decodifica)
+const link = await p.evaluate(() => window.CC.app.creaLink());
+ok(/#p=z[A-Za-z0-9_-]+$/.test(link), 'Link: il progetto è compresso nel link (' + link.length + ' caratteri)');
+
+// --- presentazione
+await p.click('#b-presenta');
+await attesa();
+ok(await p.isVisible('#presentazione'), 'Presentazione: si apre a tutto schermo');
+await p.keyboard.press('ArrowRight'); await p.keyboard.press('ArrowRight');
+ok((await p.textContent('#pres-titolo')).includes('BCWP'), 'Presentazione: con le frecce si passa a BCWP');
+await p.screenshot({ path: `${out}/flusso-presentazione.png` });
 await p.keyboard.press('Escape');
+await attesa();
+ok(await p.isHidden('#presentazione'), 'Presentazione: Esc chiude');
 
 // --- esporta: tex, pdf (orizzontale, massima), svg, stampa
 const esporta = async (formato, extra) => {
@@ -126,6 +174,13 @@ await p.pdf({ path: `${out}/flusso-stampa.pdf`, preferCSSPageSize: true, printBa
 await p.emulateMedia({ media: 'screen' });
 ok(true, 'Stampa emulata salvata');
 
+// --- esporta CSV
+await p.click('#form-esporta button[value="annulla"]').catch(() => {});
+d = await esporta('csv');
+await d.saveAs(`${out}/flusso.csv`);
+ok(d.suggestedFilename().endsWith('.csv'), 'Esporta tabella CSV');
+await p.click('#form-esporta button[value="annulla"]');
+
 // --- tema scuro, salvataggio, riapertura
 await p.click('#btn-tema');
 ok((await p.getAttribute('html', 'data-tema')) === 'scuro', 'Pulsante luna: tema scuro');
@@ -141,6 +196,22 @@ await p.setInputFiles('#file-apri', `${out}/flusso.json`);
 await attesa();
 ok((await p.inputValue('#f-titolo')) === 'Period breakdown of progress analysis', 'Apri: il file .json ricarica il progetto');
 ok((await p.inputValue('#f-av-5-acwp')) === '5,35', 'Apri: anche la tabella per periodo è stata ricaricata');
+
+// --- importa da Excel (celle incollate)
+await p.click('#btn-nuovo');
+await p.click('#b-altro');
+await p.click('[data-azione="importa"]');
+await p.fill('#testo-importa', 'Mese\tBCWS\tBCWP\tACWP\n1\t4.000\t3.500\t4.200\n2\t10.000\t8.800\t11.000\n3\t18.000\t\t\n4\t29.000\t24.000\t31.500');
+await attesa();
+ok((await p.textContent('#anteprima-importa')).includes('4 periodi'), 'Importa: anteprima di 4 periodi');
+await p.click('#btn-conferma-importa');
+await attesa();
+ok(await p.isVisible('#grafico svg path'), 'Importa: il grafico compare subito');
+
+// --- link: aprendo il link si ricarica il progetto
+await p.goto(link);
+await attesa(); await p.waitForTimeout(400);
+ok((await p.inputValue('#f-titolo')) === 'Period breakdown of progress analysis', 'Link: aprendolo il progetto si ricarica');
 await browser.close();
 console.log(log.join('\n'));
 console.log(errori.length ? 'ERRORI:\n' + errori.join('\n') : 'Nessun errore in console.');

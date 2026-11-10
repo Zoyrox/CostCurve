@@ -127,6 +127,17 @@
     if (m.previsione.modo !== 'no' && !m.previsione.visibile && m.previsione.motivo) paragrafo(m.previsione.motivo, 8.5, 'italic', COL.tenue);
     if (orizzontale) { nuovaPagina('portrait'); intestazione(true); }
 
+    // sintesi in una frase
+    spazio(14);
+    colore(COL.fondo, 'fill');
+    font('normal', 9.3);
+    const righeSintesi = doc.splitTextToSize(t('In sintesi. ' + m.riassunto), LARG - 6);
+    const hS = righeSintesi.length * 4.6 + 4;
+    doc.roundedRect(MARGINE, y, LARG, hS, 1.5, 1.5, 'F');
+    colore(COL.testo);
+    righeSintesi.forEach((r, k) => { font(k === 0 ? 'normal' : 'normal', 9.3); doc.text(r, MARGINE + 3, y + 5.2 + k * 4.6); });
+    y += hS + 3;
+
     if (rp.commento) {
       spazio(12);
       colore(COL.accento, 'fill'); doc.rect(MARGINE, y + 0.5, 0.8, 4.5, 'F');

@@ -78,6 +78,51 @@ Richieste del project manager e cosa è stato fatto:
 - **Tabella per periodo:** la riga del rilevamento era scomposta per un nome di stile in conflitto.
 - **Etichetta EAC:** veniva tagliata al bordo del grafico.
 
+
+## 1c. Versione 3 (visualizzazione e facilità d'uso)
+
+Richiesta: il grafico "peccava" sul telefono e anche sul PC non si vedeva al massimo. Tutte le 19 migliorie proposte sono state approvate e fatte.
+
+**Visualizzazione**
+1. Grafico disegnato sulla misura vera dello schermo (scritte leggibili, tacche diradate, niente scorrimento laterale).
+2. Legenda cliccabile fuori dal grafico.
+3. Niente titolo ripetuto a schermo (resta negli export).
+4. "Solo grafico" su PC.
+5. Navigatore dello zoom.
+6. Gesti sul telefono (due dita, un dito, tocco per i valori).
+7. Telefono in orizzontale: grafico a tutto schermo.
+8. Cartellini di CV/SV ed etichette che non si sovrappongono; versione compatta sugli schermi piccoli.
+
+**Telefono**
+
+9. Schede in basso: Dati, Grafico, Risultati.
+10. Barra su una riga, con il menu ⋯.
+11. App installabile (PWA), funziona offline.
+
+**Utilità**
+
+12. Cruscotto con 4 numeri e tendenza.
+13. Frase di sintesi da copiare (anche nel report e nel PDF).
+14. Link condivisibile (il progetto è dentro il link, compresso).
+15. Importazione da Excel/CSV con anteprima.
+16. Esportazione CSV.
+17. Modalità presentazione.
+18. Note sul grafico (anche nel PDF e nel .tex).
+19. Annulla/ripristina.
+
+| Verifica | Risultato |
+|---|---|
+| `npm test` | 28/28 (nuovi: note, sintesi, tendenza, importazione, CSV) |
+| `strumenti/verifica-tex.mjs` | 7 casi, 0 differenze sito ↔ .tex, 0 avvisi LaTeX; .tex con note e caratteri speciali compila |
+| `strumenti/prova-flusso.mjs` | **38/38** nel browser: legenda, navigatore, note, annulla/ripristina, cruscotto, sintesi, link (creazione e apertura), presentazione, importazione, CSV, oltre ai controlli precedenti |
+| Telefono emulato (iPhone 13) | grafico intero nella schermata, tocco con i valori, schede, orizzontale a tutto schermo; nessun errore |
+| App installabile | da un indirizzo web: service worker attivo, manifest con icone, il sito si riapre **senza rete** |
+
+**Bug trovati e corretti:**
+- **Menu "Altro":** le voci non facevano nulla, perché il menu bloccava i clic.
+- **Link:** aperto nella stessa scheda, non veniva letto.
+- **Etichette sovrapposte sul telefono:** etichette dei rilevamenti vicini, date di fine ed EAC.
+
 ## 2. Verifiche eseguite (Fase 5, versione 1)
 
 | Prova | Risultato |

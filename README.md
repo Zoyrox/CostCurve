@@ -28,6 +28,12 @@ In più:
 - **Grafico:** zoom veritiero (pulsanti, Ctrl + rotellina, trascinamento, Maiusc + trascina, intervallo preciso, schermo intero), valori veri al passaggio del mouse, curve attivabili e proporzioni a scelta.
 - **Esportazione:** report PDF, `.tex`, SVG o stampa, con la pagina del grafico verticale oppure orizzontale dedicata, la dimensione del grafico e la vista intera o zoomata.
 - **Aspetto:** tema chiaro o scuro.
+- **Versione 3:**
+  - grafico disegnato sulla misura vera dello schermo, con cruscotto, legenda cliccabile e navigatore dello zoom;
+  - modalità "solo grafico" su PC; su telefono schede Dati · Grafico · Risultati, gesti con le dita e grafico a tutto schermo in orizzontale;
+  - note sul grafico, frase di sintesi da copiare, annulla e ripristina;
+  - link da condividere, importazione da Excel/CSV ed esportazione CSV;
+  - modalità presentazione e app installabile che funziona offline.
 
 Il file .tex è **parametrico**: ha una sezione `DATI` (numeri da modificare) separata dalla sezione
 `DISEGNO`, e tutti i calcoli (CV, SV, percentuali, curve, assi, tabelle) li fa LaTeX. Se cambi un numero
@@ -44,6 +50,9 @@ js/grafico.js         disegno SVG del diagramma
 js/latex.js           generatore del file .tex
 js/report.js          tabelle, legenda, frasi
 js/pdf.js             report PDF (usa le librerie in vendor/)
+js/importa.js         importazione da Excel/CSV ed esportazione CSV
+js/presentazione.js   modalità presentazione
+manifest.webmanifest, sw.js, icone/   app installabile (PWA), funziona offline
 js/esempi.js          esempi precaricati
 js/interfaccia.js     collega pagina, modello e output
 vendor/               jsPDF 4.2.1 e svg2pdf.js 2.9.0 (MIT), inclusi: niente CDN

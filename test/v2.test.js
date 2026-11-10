@@ -96,3 +96,20 @@ test('Date: formati e data non valida', () => {
   const d = copia(trova('libro').dati); d.dataInizio = '31/02/2027';
   assert.deepEqual(errori(C.calcola(d)), ['dataInizio']);
 });
+
+test('v3: note sul grafico, previsione nascosta, riassunto e tendenza', () => {
+  const d = copia(trova('libro').dati);
+  d.note = [{ periodo: 8, testo: 'Ritardo del fornitore' }, { periodo: 3, testo: 'Avvio lavori' }, { periodo: 99, testo: 'fuori' }, { periodo: '', testo: '' }];
+  let m = C.calcola(d);
+  assert.equal(m.valido, true);
+  assert.deepEqual(m.note.map(n => [n.n, n.periodo]), [[1, 3], [2, 8]]);
+  assert.ok(m.problemi.some(p => p.campo === 'nota-2'));
+  assert.match(m.riassunto, /^Al mese 16 il progetto è in ritardo del 17,1% e costa il 22,6% in più/);
+  assert.match(m.riassunto, /costerà circa 687\.272,73 € \(budget 540\.000 €\) e finirà al mese 27,7 invece che al 23/);
+  assert.ok(m.tendenza.pcv > 0 && m.tendenza.psv < 0);
+  d.grafico = { mostra: { previsione: false } };
+  m = C.calcola(d);
+  assert.equal(m.previsione.visibile, false);
+  assert.equal(m.previsione.nascostaDaUtente, true);
+  assert.match(m.riassunto, /costerà circa/);
+});

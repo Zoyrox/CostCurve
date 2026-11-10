@@ -15,6 +15,9 @@
       document.documentElement.setAttribute('data-tema', t);
     })();
   </script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0B5CAD">
+  <link rel="apple-touch-icon" href="icone/icona-192.png">
   <link rel="stylesheet" href="css/stile.css">
   <link rel="stylesheet" href="css/stampa.css" media="print">
 </head>
@@ -38,6 +41,16 @@
     <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></symbol>
     <symbol id="i-chiudi" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
     <symbol id="i-grafico" viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 16c4 0 5-8 12-9"/></symbol>
+    <symbol id="i-annulla" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+    <symbol id="i-ripristina" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></symbol>
+    <symbol id="i-altro" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+    <symbol id="i-focus" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></symbol>
+    <symbol id="i-presenta" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/><path d="m10 8 4 2-4 2V8Z"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-importa" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></symbol>
+    <symbol id="i-impostazioni" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+    <symbol id="i-dati" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-risultati" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></symbol>
     <symbol id="i-copia" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></symbol>
   </defs>
 </svg>
@@ -55,9 +68,27 @@
     <select id="scelta-esempio" class="campo-select">
       <option value="">Esempi…</option>
     </select>
-    <button type="button" class="btn btn-fantasma" id="btn-nuovo" title="Nuovo progetto"><svg class="ico"><use href="#i-nuovo"/></svg><span>Nuovo</span></button>
-    <button type="button" class="btn btn-fantasma" id="btn-apri" title="Apri un progetto salvato (.json)"><svg class="ico"><use href="#i-apri"/></svg><span>Apri</span></button>
-    <button type="button" class="btn btn-fantasma" id="btn-salva" title="Salva il progetto in un file (.json)"><svg class="ico"><use href="#i-salva"/></svg><span>Salva</span></button>
+    <span class="gruppo-storia">
+      <button type="button" class="btn btn-icona btn-senza-bordo" id="btn-annulla" title="Annulla (Ctrl+Z)" aria-label="Annulla" disabled><svg class="ico"><use href="#i-annulla"/></svg></button>
+      <button type="button" class="btn btn-icona btn-senza-bordo" id="btn-ripristina" title="Ripristina (Ctrl+Y)" aria-label="Ripristina" disabled><svg class="ico"><use href="#i-ripristina"/></svg></button>
+    </span>
+    <button type="button" class="btn btn-fantasma solo-largo" id="btn-nuovo" title="Nuovo progetto"><svg class="ico"><use href="#i-nuovo"/></svg><span>Nuovo</span></button>
+    <button type="button" class="btn btn-fantasma solo-largo" id="btn-apri" title="Apri un progetto salvato (.json)"><svg class="ico"><use href="#i-apri"/></svg><span>Apri</span></button>
+    <button type="button" class="btn btn-fantasma solo-largo" id="btn-salva" title="Salva il progetto in un file (.json)"><svg class="ico"><use href="#i-salva"/></svg><span>Salva</span></button>
+    <div class="menu">
+      <button type="button" class="btn btn-icona" id="b-altro" aria-expanded="false" aria-controls="m-altro" title="Altro" aria-label="Altre azioni"><svg class="ico"><use href="#i-altro"/></svg></button>
+      <div class="pop pop-menu" id="m-altro" hidden role="menu">
+        <button type="button" class="voce solo-stretto" role="menuitem" data-azione="annulla"><svg class="ico"><use href="#i-annulla"/></svg>Annulla</button>
+        <button type="button" class="voce solo-stretto" role="menuitem" data-azione="ripristina"><svg class="ico"><use href="#i-ripristina"/></svg>Ripristina</button>
+        <button type="button" class="voce solo-stretto" role="menuitem" data-azione="nuovo"><svg class="ico"><use href="#i-nuovo"/></svg>Nuovo progetto</button>
+        <button type="button" class="voce solo-stretto" role="menuitem" data-azione="apri"><svg class="ico"><use href="#i-apri"/></svg>Apri progetto (.json)</button>
+        <button type="button" class="voce solo-stretto" role="menuitem" data-azione="salva"><svg class="ico"><use href="#i-salva"/></svg>Salva progetto (.json)</button>
+        <button type="button" class="voce" role="menuitem" data-azione="importa"><svg class="ico"><use href="#i-importa"/></svg>Importa da Excel / CSV</button>
+        <button type="button" class="voce" role="menuitem" data-azione="link"><svg class="ico"><use href="#i-link"/></svg>Copia il link del progetto</button>
+        <button type="button" class="voce" role="menuitem" data-azione="presenta"><svg class="ico"><use href="#i-presenta"/></svg>Presentazione</button>
+        <button type="button" class="voce" role="menuitem" data-azione="installa" hidden><svg class="ico"><use href="#i-scarica"/></svg>Installa come app</button>
+      </div>
+    </div>
     <input type="file" id="file-apri" accept=".json,application/json" hidden>
     <button type="button" class="btn btn-icona" id="btn-tema" aria-label="Passa al tema scuro" title="Tema chiaro / scuro">
       <svg class="ico ico-luna"><use href="#i-luna"/></svg><svg class="ico ico-sole"><use href="#i-sole"/></svg>
@@ -272,7 +303,7 @@
         </div>
         <p class="aiuto-breve" id="aiuto-previsione"></p>
       </fieldset>
-      <div class="riga-2 solo-prev-man" hidden>
+      <div class="riga-2 solo-prev-man" hidden data-dopo-note>
         <div class="campo" data-campo="prev-eac">
           <label for="f-prev-eac">Costo finale previsto (EAC)</label>
           <input id="f-prev-eac" type="text" inputmode="decimal" autocomplete="off">
@@ -284,10 +315,21 @@
           <p class="msg" id="msg-prev-fine" aria-live="polite"></p>
         </div>
       </div>
+      <details class="sezione-facoltativa" id="dettagli-note">
+        <summary>Note sul grafico <span class="facoltativo">facoltative</span></summary>
+        <div id="elenco-note" class="elenco-note"></div>
+        <button type="button" class="btn btn-secondario btn-piccolo" id="btn-aggiungi-nota"><svg class="ico"><use href="#i-piu"/></svg>Aggiungi una nota</button>
+        <p class="aiuto-breve">Esempio: mese 8, "ritardo del fornitore". Compare come numero sul grafico, nel PDF e nel .tex.</p>
+      </details>
     </div>
 
     <!-- ---------- PASSO 4: RISULTATI ---------- -->
     <div class="pannello" role="tabpanel" id="passo-4" aria-labelledby="tab-4" hidden>
+      <div class="sintesi" id="sintesi" hidden>
+        <p class="sintesi-etichetta">In sintesi</p>
+        <p id="testo-sintesi"></p>
+        <button type="button" class="btn btn-testo btn-piccolo" id="btn-copia-sintesi"><svg class="ico"><use href="#i-copia"/></svg>Copia la frase</button>
+      </div>
       <div id="riepilogo-risultati" aria-live="polite"></div>
       <button type="button" class="btn btn-primario btn-largo" id="btn-esporta-2"><svg class="ico"><use href="#i-scarica"/></svg>Esporta PDF, LaTeX o immagine</button>
     </div>
@@ -307,7 +349,7 @@
           <p id="grafico-sottotitolo" class="sottotitolo"></p>
         </div>
         <div class="strumenti" role="toolbar" aria-label="Strumenti del grafico">
-          <div class="gruppo">
+          <div class="gruppo gruppo-zoom">
             <button type="button" class="btn btn-icona" id="z-meno" title="Riduci lo zoom" aria-label="Riduci lo zoom"><svg class="ico"><use href="#i-meno"/></svg></button>
             <span class="livello-zoom" id="livello-zoom" aria-live="polite">100%</span>
             <button type="button" class="btn btn-icona" id="z-piu" title="Ingrandisci" aria-label="Ingrandisci"><svg class="ico"><use href="#i-piu"/></svg></button>
@@ -315,7 +357,7 @@
           </div>
           <div class="gruppo">
             <div class="menu">
-              <button type="button" class="btn btn-icona-testo" id="b-intervallo" aria-expanded="false" aria-controls="m-intervallo"><svg class="ico"><use href="#i-intervallo"/></svg><span>Intervallo</span></button>
+              <button type="button" class="btn btn-icona-testo" id="b-intervallo" aria-expanded="false" aria-controls="m-intervallo" title="Intervallo preciso"><svg class="ico"><use href="#i-intervallo"/></svg><span class="testo-pulsante">Intervallo</span></button>
               <div class="pop" id="m-intervallo" hidden>
                 <p class="pop-titolo">Intervallo da mostrare</p>
                 <div class="riga-2">
@@ -334,23 +376,25 @@
               </div>
             </div>
             <div class="menu">
-              <button type="button" class="btn btn-icona-testo" id="b-mostra" aria-expanded="false" aria-controls="m-mostra"><svg class="ico"><use href="#i-livelli"/></svg><span>Mostra</span></button>
+              <button type="button" class="btn btn-icona" id="b-mostra" aria-expanded="false" aria-controls="m-mostra" title="Opzioni del grafico" aria-label="Opzioni del grafico"><svg class="ico"><use href="#i-impostazioni"/></svg></button>
               <div class="pop" id="m-mostra" hidden>
-                <p class="pop-titolo">Elementi del grafico</p>
-                <label class="spunta"><input type="checkbox" data-mostra="bcws"><span class="campione campione-bcws"></span>Pianificato (BCWS)</label>
-                <label class="spunta"><input type="checkbox" data-mostra="bcwp"><span class="campione campione-bcwp"></span>Lavoro svolto (BCWP)</label>
-                <label class="spunta"><input type="checkbox" data-mostra="acwp"><span class="campione campione-acwp"></span>Costo effettivo (ACWP)</label>
-                <label class="spunta"><input type="checkbox" data-mostra="frecce">Frecce CV e SV</label>
-                <label class="spunta"><input type="checkbox" data-mostra="etichette">Etichette dei punti</label>
+                <p class="pop-titolo">Opzioni del grafico</p>
+                <label class="spunta"><input type="checkbox" data-mostra="frecce">Frecce e valori di CV e SV</label>
+                <label class="spunta"><input type="checkbox" data-mostra="etichette">Etichette dei punti ed EAC</label>
                 <label class="campo campo-compatto" for="s-proporzioni">Proporzioni</label>
                 <select id="s-proporzioni" class="campo-select"></select>
+                <p class="aiuto-breve">Le curve si mostrano o nascondono toccando la legenda.</p>
               </div>
             </div>
+            <button type="button" class="btn btn-icona solo-largo" id="b-focus" title="Solo grafico: nasconde il pannello dei dati" aria-label="Solo grafico" aria-pressed="false"><svg class="ico"><use href="#i-focus"/></svg></button>
+            <button type="button" class="btn btn-icona" id="b-presenta" title="Presentazione" aria-label="Presentazione"><svg class="ico"><use href="#i-presenta"/></svg></button>
             <button type="button" class="btn btn-icona" id="b-schermo" title="Schermo intero" aria-label="Schermo intero"><svg class="ico"><use href="#i-schermo"/></svg></button>
           </div>
         </div>
       </div>
 
+      <div class="cruscotto" id="cruscotto" aria-live="polite"></div>
+      <div class="legenda-grafico" id="legenda-grafico" role="group" aria-label="Legenda: tocca una voce per mostrarla o nasconderla"></div>
       <div class="problemi" id="problemi" aria-live="polite"></div>
       <div class="contenitore-grafico" id="contenitore-grafico">
         <div class="grafico" id="grafico"></div>
@@ -359,14 +403,59 @@
         <div class="suggerimento-mouse" id="tooltip" role="status" hidden></div>
         <div class="avviso-zoom" id="avviso-zoom" hidden>Usa <kbd>Ctrl</kbd> + rotellina per lo zoom</div>
       </div>
-      <p class="aiuto-grafico" id="aiuto-grafico">Ctrl + rotellina per lo zoom · trascina per spostarti · Maiusc + trascina per ingrandire un'area · doppio clic per vedere tutto</p>
-      <div class="semafori" id="semafori"></div>
+      <div class="navigatore" id="navigatore" aria-label="Navigatore dello zoom: trascina il riquadro"></div>
+      <p class="aiuto-grafico" id="aiuto-grafico"><span class="solo-mouse">Ctrl + rotellina per lo zoom · trascina per spostarti · Maiusc + trascina per un'area · doppio clic per vedere tutto</span><span class="solo-tocco">Due dita per lo zoom · un dito per spostarti · tocca un punto per i valori</span></p>
+      <button type="button" class="btn btn-secondario chiudi-pieno" id="chiudi-pieno" hidden>Chiudi</button>
     </div>
   </section>
 </main>
 
 <!-- ================= REPORT (anche per la stampa) ================= -->
 <section class="report" id="report" aria-label="Resoconto completo" hidden></section>
+
+<nav class="schede-mobile" aria-label="Sezioni">
+  <button type="button" data-scheda="dati" aria-pressed="true"><svg class="ico"><use href="#i-dati"/></svg>Dati</button>
+  <button type="button" data-scheda="grafico" aria-pressed="false"><svg class="ico"><use href="#i-grafico"/></svg>Grafico</button>
+  <button type="button" data-scheda="risultati" aria-pressed="false"><svg class="ico"><use href="#i-risultati"/></svg>Risultati</button>
+</nav>
+
+<!-- ================= FINESTRA IMPORTA ================= -->
+<dialog class="finestra" id="finestra-importa" aria-labelledby="importa-titolo">
+  <form method="dialog" class="finestra-contenuto">
+    <div class="finestra-testa">
+      <h2 id="importa-titolo">Importa da Excel o CSV</h2>
+      <button type="submit" value="annulla" class="btn btn-icona" aria-label="Chiudi"><svg class="ico"><use href="#i-chiudi"/></svg></button>
+    </div>
+    <p class="aiuto-breve">Una riga per periodo, con le colonne <strong>periodo, BCWS, BCWP, ACWP</strong> (valori cumulati; BCWP e ACWP possono restare vuoti dove non li conosci). Da Excel: seleziona le celle e incollale qui, oppure salva come CSV e trascina il file.</p>
+    <label class="zona-file" id="zona-file">
+      <input type="file" id="file-importa" accept=".csv,.tsv,.txt,text/csv,text/plain">
+      <svg class="ico"><use href="#i-importa"/></svg><span>Trascina qui un file CSV o <u>scegli un file</u></span>
+    </label>
+    <label for="testo-importa" class="campo-compatto">…oppure incolla qui le celle copiate</label>
+    <textarea id="testo-importa" rows="6" spellcheck="false" placeholder="mese;BCWS;BCWP;ACWP&#10;1;4000;3500;4200&#10;2;10000;8800;11000"></textarea>
+    <div id="anteprima-importa" class="anteprima-importa" aria-live="polite"></div>
+    <div class="finestra-piede">
+      <span class="spazio"></span>
+      <button type="submit" value="annulla" class="btn btn-secondario">Annulla</button>
+      <button type="button" class="btn btn-primario" id="btn-conferma-importa" disabled>Importa</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ================= PRESENTAZIONE ================= -->
+<div class="presentazione" id="presentazione" hidden role="dialog" aria-modal="true" aria-labelledby="pres-titolo">
+  <div class="pres-testa">
+    <p class="pres-progetto" id="pres-progetto"></p>
+    <span class="pres-contatore" id="pres-contatore"></span>
+    <button type="button" class="btn btn-icona" id="pres-chiudi" aria-label="Chiudi la presentazione" title="Esc"><svg class="ico"><use href="#i-chiudi"/></svg></button>
+  </div>
+  <div class="pres-grafico" id="pres-grafico"></div>
+  <div class="pres-didascalia">
+    <button type="button" class="btn btn-icona" id="pres-prima" aria-label="Precedente" title="←">‹</button>
+    <div><h2 id="pres-titolo"></h2><p id="pres-testo"></p></div>
+    <button type="button" class="btn btn-icona" id="pres-dopo" aria-label="Successiva" title="→">›</button>
+  </div>
+</div>
 
 <footer class="piede">
   <p>CostCurve · formule del libro di testo (pagg. 198-199) · i dati restano nel tuo browser · funziona anche offline.</p>
@@ -387,6 +476,7 @@
         <label class="scelta"><input type="radio" name="formato" value="tex"><span><strong>File LaTeX (.tex)</strong><small>Output ufficiale, parametrico: si compila con pdflatex o Overleaf</small></span></label>
         <label class="scelta"><input type="radio" name="formato" value="svg"><span><strong>Immagine (SVG)</strong><small>Solo il grafico, vettoriale</small></span></label>
         <label class="scelta"><input type="radio" name="formato" value="stampa"><span><strong>Stampa</strong><small>Con la stampante o "Salva come PDF" del browser</small></span></label>
+        <label class="scelta"><input type="radio" name="formato" value="csv"><span><strong>Tabella (CSV per Excel)</strong><small>Periodi, BCWS, BCWP, ACWP, CV e SV</small></span></label>
       </div>
     </fieldset>
 
@@ -444,9 +534,11 @@
 <script src="js/grafico.js"></script>
 <script src="js/latex.js"></script>
 <script src="js/report.js"></script>
+<script src="js/importa.js"></script>
 <script src="vendor/jspdf-4.2.1.umd.min.js" defer></script>
 <script src="vendor/svg2pdf-2.9.0.umd.min.js" defer></script>
 <script src="js/pdf.js" defer></script>
 <script src="js/interfaccia.js" defer></script>
+<script src="js/presentazione.js" defer></script>
 </body>
 </html>

@@ -657,6 +657,14 @@
   }\ccTmp
 }
 
+% Note sul grafico: numero cerchiato sull'asse dei tempi ed elenco sotto il grafico
+\newcounter{ccnota}
+\newcommand{\CCnotaGrafico}[2]{\stepcounter{ccnota}%
+  \edef\ccTmp{\noexpand\CCseDentroX{#1}{%
+    \noexpand\draw[ccTenue, densely dotted, line width=0.6pt] (#1,\CCv{ymin}) -- ([yshift=7mm]axis cs:#1,\CCv{ymin});
+    \noexpand\node[circle, draw=ccInk, fill=white, inner sep=0.8pt, minimum size=10pt, font=\noexpand\scriptsize\noexpand\bfseries, text=ccInk] at ([yshift=9.6mm]axis cs:#1,\CCv{ymin}) {\arabic{ccnota}};}}\ccTmp}
+\newcommand{\CCnotaElenco}[2]{\stepcounter{ccnota}\quad(\arabic{ccnota})~\UnitaTempoSingolare~\num{#1}: #2}
+
 % ---------------------------------------------------------------------
 % INTESTAZIONE E DIAGRAMMA (usati nella pagina verticale o orizzontale)
 % ---------------------------------------------------------------------
@@ -714,6 +722,7 @@
 \clip (axis cs:\CCv{xmin},\CCv{ymin}) rectangle ([xshift=22mm,yshift=12mm]axis cs:\CCv{xmax},\CCv{ymax});
 \CCdisegnaRilevamento{A}{1}
 \CCseDue{\CCdisegnaRilevamento{B}{2}}{}
+\setcounter{ccnota}{0}\let\nota\CCnotaGrafico\NoteGrafico
 \CCprevisione{%
   \node[ccriquadro] at (\CCv{fine},\CCv{eac}) {};
   \CCseMostra{Etichette}{\node[ccetichetta, anchor=west, xshift=4pt] at (\CCv{fine},\CCv{eac}) {EAC \mdseries\CCbreve{eac}};}}{}
@@ -740,7 +749,8 @@
 \end{axis}
 \end{tikzpicture}
 \end{center}
-\CCprevisione{}{\CCmotivo}}
+\CCprevisione{}{\CCmotivo}
+\CCseNonVuoto{\NoteGrafico}{{\small\textbf{Note sul grafico.}\setcounter{ccnota}{0}\let\nota\CCnotaElenco\NoteGrafico\par}}}
 
 \begin{document}
 
@@ -861,6 +871,9 @@ Documento generato con CostCurve: per cambiare i dati modifica solo la sezione D
     const etichette = modello.etichettePeriodi.length ? modello.etichettePeriodi.join(', ') : '';
     const oggi = new Date().toISOString().slice(0, 10);
     const pm = d.previsioneManuale;
+    // previsione nascosta dall'utente = nessuna previsione nel documento
+    const previsione = modello.previsione.nascostaDaUtente ? 'no' : d.previsione;
+    const note = (modello.note || []).map(nt => `%\n  \\nota{${L(nt.periodo)}}{${testoLatex(nt.testo)}}`).join('') + (modello.note && modello.note.length ? '%\n' : '');
     const intestazione = String.raw`% =====================================================================
 % Diagramma costi-tempi (earned value) generato con CostCurve
 % Data di creazione: ${oggi}
@@ -911,9 +924,11 @@ ${coppie(modello.punti.acwp)}%
 \newcommand{\TempoA}{${r1.t}}
 \newcommand{\TempoB}{${r2 ? r2.t : ''}}
 % Previsione: auto (EAC = BAC/CPI, fine = Durata/SPI), manuale oppure no
-\newcommand{\Previsione}{${d.previsione}}
-\newcommand{\EACManuale}{${d.previsione === 'manuale' ? L(pm.eac) : ''}}
-\newcommand{\FineManuale}{${d.previsione === 'manuale' ? L(pm.fine) : ''}}
+\newcommand{\Previsione}{${previsione}}
+\newcommand{\EACManuale}{${previsione === 'manuale' ? L(pm.eac) : ''}}
+\newcommand{\FineManuale}{${previsione === 'manuale' ? L(pm.fine) : ''}}
+% Note sul grafico (facoltative): \nota{periodo}{testo}, una dopo l'altra
+\newcommand{\NoteGrafico}{${note}}
 % Aspetto del grafico: proporzioni (larghezza/altezza) e curve da mostrare (1 = sì, 0 = no)
 \newcommand{\Proporzioni}{${L(modello.proporzioni)}}
 \newcommand{\MostraBCWS}{${b(mo.bcws)}}

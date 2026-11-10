@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  const { numeri, calcoli, esempi, grafico, latex, report } = window.CC;
+  const { numeri, calcoli, esempi, grafico, latex, report, importa } = window.CC;
   const $ = sel => document.querySelector(sel);
   const $$ = sel => Array.from(document.querySelectorAll(sel));
   const CHIAVE = 'costcurve:v2';
@@ -23,6 +23,10 @@
   const toccati = new Set();
   let formatoEsporta = 'pdf';
   let timer = null;
+  // annulla / ripristina: istantanee dei dati
+  const storia = [], futuro = [];
+  let ultimoStato = null, timerStoria = null;
+  let valoriFissi = null;   // valori mostrati con un tocco (telefono)
 
   // ---------------------------------------------------------------------
   // Utilità
@@ -53,6 +57,7 @@
       avanzamento: d.avanzamento.map(a => ({ bcwp: n(a.bcwp), acwp: n(a.acwp) })),
       previsione: d.previsione, previsioneManuale: { eac: n(d.previsioneManuale.eac), fine: n(d.previsioneManuale.fine) },
       grafico: d.grafico, esporta: d.esporta,
+      note: d.note.map(nt => ({ periodo: n(nt.periodo), testo: nt.testo })).filter(nt => nt.testo || nt.periodo !== null),
     };
   }
 
@@ -84,8 +89,10 @@
       rilevamenti: d.rilevamenti.map(r => ({ periodo: perCampo(r.periodo), bcwp: perCampo(r.bcwp), acwp: perCampo(r.acwp) })),
       avanzamento: d.avanzamento.map(a => ({ bcwp: perCampo(a.bcwp), acwp: perCampo(a.acwp) })),
       previsioneManuale: { eac: perCampo(d.previsioneManuale.eac), fine: perCampo(d.previsioneManuale.fine) },
+      note: d.note.map(nt => ({ periodo: perCampo(nt.periodo), testo: nt.testo })),
     };
     if (opzioni.durataVuota) dati.durata = '';
+    if (!opzioni.daStoria) { storia.length = 0; futuro.length = 0; ultimoStato = JSON.stringify(dati); aggiornaPulsantiStoria(); }
     esempioAttivo = idEsempio || null;
     toccati.clear();
     mostraTutti = Boolean(opzioni.mostraTutti);
@@ -126,8 +133,23 @@
     $$('[data-mostra]').forEach(c => { c.checked = dati.grafico.mostra[c.dataset.mostra] !== false; });
     $('#s-proporzioni').value = String(dati.grafico.proporzioni);
     costruisciTabelle();
+    costruisciNote();
+    $('#dettagli-note').open = dati.note.length > 0;
     aggiornaVisibilita();
     aggiornaEtichetteUnita();
+  }
+
+  /** Editor delle note: una riga per nota (periodo + testo). */
+  function costruisciNote() {
+    const s = ut().singolare;
+    $('#elenco-note').innerHTML = dati.note.map((nt, i) => `<div class="riga-nota" data-i="${i}">
+        <span class="num-nota">${i + 1}</span>
+        <label class="nascosto" for="f-nota-${i}-periodo">${s} della nota ${i + 1}</label>
+        <input id="f-nota-${i}-periodo" class="nota-periodo" type="text" inputmode="decimal" placeholder="${s}" value="${esc(nt.periodo)}" data-k="periodo">
+        <label class="nascosto" for="f-nota-${i}-testo">Testo della nota ${i + 1}</label>
+        <input id="f-nota-${i}-testo" type="text" maxlength="140" placeholder="es. ritardo del fornitore" value="${esc(nt.testo)}" data-k="testo">
+        <button type="button" class="btn btn-icona btn-senza-bordo" data-togli-nota="${i}" aria-label="Elimina la nota ${i + 1}"><svg class="ico"><use href="#i-chiudi"/></svg></button>
+      </div>`).join('');
   }
 
   function durataValida() {
@@ -252,6 +274,8 @@
     disegnaGrafico(errori, avvisi);
 
     // 5) risultati e report
+    $('#sintesi').hidden = !modello.valido;
+    if (modello.valido) $('#testo-sintesi').textContent = modello.riassunto;
     if (modello.valido) {
       $('#riepilogo-risultati').innerHTML = report.riepilogo(modello);
       $('#report').innerHTML = report.report(modello, '');
@@ -264,45 +288,98 @@
     salvaNelBrowser();
   }
 
+  /** Misure del grafico sullo schermo: larghezza vera del riquadro, altezza adatta alla finestra. */
+  function misureGrafico() {
+    const cont = $('#contenitore-grafico');
+    const w = Math.max(280, Math.floor(cont.clientWidth || 800));
+    const vh = window.innerHeight;
+    const mobile = window.matchMedia('(max-width: 900px)').matches;
+    let h;
+    if (document.body.classList.contains('grafico-pieno')) h = vh - 96;
+    else if (document.body.classList.contains('solo-grafico')) h = Math.max(320, vh - 300);
+    else if (mobile) h = Math.max(260, Math.min(w / 1.05, vh * 0.58));
+    else h = Math.max(300, Math.min((w - 90) / (dati.grafico.proporzioni || 1.6) + 70, vh - 330));
+    return { w, h: Math.round(h) };
+  }
+
   function disegnaGrafico(errori, avvisi) {
     errori = errori || modello.problemi.filter(p => p.livello === 'errore');
     avvisi = avvisi || modello.problemi.filter(p => p.livello === 'avviso');
     const box = $('#problemi');
     const cont = $('#contenitore-grafico');
-    $('#semafori').innerHTML = '';
+    const nav = $('#navigatore');
     if (modello.valido) {
-      $('#grafico').innerHTML = grafico.disegna(modello, { tema: tema() });
-      $('#semafori').innerHTML = report.semafori(modello);
+      const { w, h } = misureGrafico();
+      $('#grafico').innerHTML = grafico.disegnaSchermo(modello, { larghezza: w, altezza: h, tema: tema() });
+      const svg = $('#grafico svg');
+      nav.innerHTML = grafico.disegnaNavigatore(modello, { larghezza: w, L: +svg.dataset.l, PW: +svg.dataset.pw, tema: tema() });
+      nav.hidden = false;
+      $('#legenda-grafico').innerHTML = legendaHTML();
+      $('#cruscotto').innerHTML = cruscottoHTML();
       box.innerHTML = avvisi.length ? `<ul class="lista-avvisi">${avvisi.map(p => `<li><button type="button" class="link" data-vai="${p.campo}">${esc(p.messaggio)}</button></li>`).join('')}</ul>` : '';
       const a = modello.assi, p = a.pieno;
-      const livello = Math.round((p.xmax - p.xmin) / (a.xmax - a.xmin) * 100);
-      $('#livello-zoom').textContent = livello + '%';
+      $('#livello-zoom').textContent = Math.round((p.xmax - p.xmin) / (a.xmax - a.xmin) * 100) + '%';
       $('#grafico-sottotitolo').textContent = a.zoomato
         ? `Vista: ${ut().plurale} ${numeri.formatNumero(a.xmin, 'auto')} – ${numeri.formatNumero(a.xmax, 'auto')}${a.assePezzato ? ' · asse dei costi da ' + numeri.formatNumero(a.ymin, a.decimaliY) : ''}`
         : `${modello.durata} ${ut().plurale} · budget ${numeri.formatNumero(modello.bac)} ${modello.unitaMoneta.breve}`;
       cont.classList.toggle('zoomato', a.zoomato);
       $('#aiuto-grafico').hidden = false;
-    } else if (!haDati()) {
-      $('#grafico').innerHTML = `<div class="vuoto-iniziale">
-          <svg class="ico ico-grande"><use href="#i-grafico"/></svg>
-          <h2>Inizia un nuovo progetto</h2>
-          <p>Compila i dati a sinistra: titolo, durata e budget, poi il piano e i rilevamenti. Il diagramma compare qui mentre scrivi.</p>
-          <div class="azioni-vuoto">
-            <button type="button" class="btn btn-primario" data-esempio="grafico-libro">Apri il grafico del libro</button>
-            <button type="button" class="btn btn-secondario" data-esempio="libro">Esempio numerico del libro</button>
-          </div></div>`;
-      box.innerHTML = '';
+      if (valoriFissi !== null) mostraValoriPeriodo(valoriFissi);
+    } else {
+      nav.innerHTML = ''; nav.hidden = true;
+      $('#legenda-grafico').innerHTML = '';
+      $('#cruscotto').innerHTML = '';
       $('#grafico-sottotitolo').textContent = '';
       $('#livello-zoom').textContent = '100%';
       cont.classList.remove('zoomato');
       $('#aiuto-grafico').hidden = true;
-    } else {
-      $('#grafico').innerHTML = grafico.segnaposto(errori.length === 1 ? 'Manca un solo dato.' : `Mancano ${errori.length} dati.`, tema());
-      box.innerHTML = `<div class="da-completare"><p>Per vedere il diagramma completa:</p><ul>${errori.slice(0, 5).map(p => `<li><button type="button" class="link" data-vai="${p.campo}">${esc(p.messaggio)}</button></li>`).join('')}</ul>${errori.length > 5 ? `<p>…e altri ${errori.length - 5}.</p>` : ''}</div>`;
-      $('#grafico-sottotitolo').textContent = '';
-      cont.classList.remove('zoomato');
-      $('#aiuto-grafico').hidden = true;
+      if (!haDati()) {
+        $('#grafico').innerHTML = `<div class="vuoto-iniziale">
+            <svg class="ico ico-grande"><use href="#i-grafico"/></svg>
+            <h2>Inizia un nuovo progetto</h2>
+            <p>Compila i dati: titolo, durata e budget, poi il piano e i rilevamenti. Il diagramma compare qui mentre scrivi. Hai già i dati in Excel? Importali.</p>
+            <div class="azioni-vuoto">
+              <button type="button" class="btn btn-primario" data-esempio="grafico-libro">Apri il grafico del libro</button>
+              <button type="button" class="btn btn-secondario" data-esempio="libro">Esempio numerico</button>
+              <button type="button" class="btn btn-secondario" data-azione="importa">Importa da Excel</button>
+            </div></div>`;
+        box.innerHTML = '';
+      } else {
+        $('#grafico').innerHTML = grafico.segnaposto(errori.length === 1 ? 'Manca un solo dato.' : `Mancano ${errori.length} dati.`, tema());
+        box.innerHTML = `<div class="da-completare"><p>Per vedere il diagramma completa:</p><ul>${errori.slice(0, 5).map(p => `<li><button type="button" class="link" data-vai="${p.campo}">${esc(p.messaggio)}</button></li>`).join('')}</ul>${errori.length > 5 ? `<p>…e altri ${errori.length - 5}.</p>` : ''}</div>`;
+      }
     }
+  }
+
+  /** Legenda cliccabile: tocca una curva per mostrarla o nasconderla. */
+  function legendaHTML() {
+    const C = grafico.TEMI[tema()], mo = dati.grafico.mostra, pv = modello.previsione;
+    const voce = (k, nome, colore, tratto) => `<button type="button" class="voce-legenda" data-curva="${k}" aria-pressed="${mo[k] !== false}" title="${mo[k] !== false ? 'Nascondi' : 'Mostra'}: ${esc(nome)}">
+        <svg width="26" height="10" aria-hidden="true"><line x1="1" y1="5" x2="25" y2="5" stroke="${colore}" stroke-width="2.6" stroke-linecap="round"${tratto ? ` stroke-dasharray="${tratto}"` : ''}/></svg>${esc(nome)}</button>`;
+    let h = voce('bcws', 'Pianificato (BCWS)', C.bcws, '') + voce('bcwp', 'Lavoro svolto (BCWP)', C.bcwp, '6 3') + voce('acwp', 'Costo effettivo (ACWP)', C.acwp, '7 3 2 3');
+    if (pv.modo !== 'no' && pv.eac !== null && (pv.visibile || pv.nascostaDaUtente)) h += voce('previsione', 'Previsione (EAC)', C.acwp, '2 3');
+    if (modello.assi.assePezzato) h += `<span class="voce-info" title="L'asse dei costi non parte da zero">≈ costi da ${numeri.formatNumero(modello.assi.ymin, modello.assi.decimaliY)}</span>`;
+    for (const nt of modello.note) h += `<span class="voce-info voce-nota"><b>${nt.n}</b>${esc(ut().singolare)} ${esc(numeri.formatNumero(nt.periodo, 'auto'))}: ${esc(nt.testo)}</span>`;
+    return h;
+  }
+
+  /** Cruscotto: i numeri che contano, con la tendenza dal rilevamento precedente. */
+  function cruscottoHTML() {
+    const m = modello, r = m.rilevamenti[m.rilevamenti.length - 1], t = m.tendenza, pv = m.previsione;
+    const freccia = d => (d === null || d === undefined || Math.abs(d) < 0.05 ? ''
+      : `<span class="tendenza ${d > 0 ? 'meglio' : 'peggio'}" title="Rispetto al rilevamento precedente: ${d > 0 ? 'migliora' : 'peggiora'} di ${numeri.formatNumero(Math.abs(d), 1)} punti">${d > 0 ? '▲' : '▼'} ${numeri.formatNumero(Math.abs(d), 1)} pt</span>`);
+    const cl = v => (v < 0 ? 'neg' : v > 0 ? 'pos' : '');
+    const tessera = (nome, valore, sotto, extra, classe) => `<div class="tessera"><span class="tessera-nome">${nome}</span><span class="tessera-valore ${classe || ''}">${valore}</span><span class="tessera-sotto">${sotto}${extra || ''}</span></div>`;
+    let h = tessera('Tempi (SV)', numeri.formatPercentuale(r.psv), `${numeri.formatConSegno(r.sv)} ${m.unitaMoneta.breve} `, freccia(t && t.psv), cl(r.sv));
+    h += tessera('Costi (CV)', numeri.formatPercentuale(r.pcv), `${numeri.formatConSegno(r.cv)} ${m.unitaMoneta.breve} `, freccia(t && t.pcv), cl(r.cv));
+    if (pv.eac !== null && pv.durataPrevista !== null && pv.modo !== 'no') {
+      const dEac = (pv.eac - m.bac) / m.bac * 100, dFine = pv.durataPrevista - m.durata;
+      h += tessera('Costo finale stimato', numeri.formatBreve(pv.eac), `budget ${numeri.formatBreve(m.bac)} · ${numeri.formatPercentuale(dEac)}`, '', dEac > 0.05 ? 'neg' : dEac < -0.05 ? 'pos' : '');
+      h += tessera('Fine stimata', `${ut().singolare} ${numeri.formatNumero(pv.durataPrevista, 1)}`, `piano: ${m.durata} · ${dFine > 0 ? '+' : ''}${numeri.formatNumero(dFine, 1)}`, '', dFine > 0.05 ? 'neg' : dFine < -0.05 ? 'pos' : '');
+    } else {
+      h += tessera('Stato', `${r.stato.icona} ${r.stato.parola}`, `rilevamento ${r.n} · ${ut().singolare} ${r.t}`, '', r.stato.colore === 'verde' ? 'pos' : r.stato.colore === 'rosso' ? 'neg' : '');
+    }
+    return h;
   }
 
   /** Cumulati del piano dai valori scritti (null se il piano non è completo). */
@@ -416,6 +493,45 @@
     impostaVista({ da, a: fino, ymin: conY ? v.ymin : null, ymax: conY ? v.ymax : null });
   }
 
+  /** Riquadro con i valori VERI del periodo k (mai valori inventati). */
+  function mostraValoriPeriodo(k, cx, cy) {
+    const tip = $('#tooltip'), guida = $('#guida');
+    const g = geom();
+    const m = modello;
+    if (!g || k < 0 || k > m.durata || k < m.assi.xmin - 1e-9 || k > m.assi.xmax + 1e-9) { tip.hidden = true; guida.hidden = true; return; }
+    const pt = s => { const p = m.punti[s].find(q => q[0] === k); return p ? p[1] : (k === 0 ? 0 : null); };
+    const ril = m.rilevamenti.find(r => r.t === k);
+    const nota = m.note.find(nt => Math.round(nt.periodo) === k);
+    const C = grafico.TEMI[tema()];
+    const riga = (colore, nome, v) => `<div class="tt-riga"><span><span class="tt-punto" style="background:${colore}"></span>${nome}</span><b>${v === null ? '—' : numeri.formatNumero(v)}</b></div>`;
+    let h = `<div class="tt-titolo">${esc(ut().singolare[0].toUpperCase() + ut().singolare.slice(1))} ${k}${m.inizio ? ' · ' + esc(m.etichettaTempo(k)) : ''}${ril ? ` · rilevamento ${ril.n}` : ''}</div>`;
+    h += riga(C.bcws, 'BCWS pianificato', m.bcwsCum[k]);
+    h += riga(C.bcwp, 'BCWP lavoro svolto', pt('bcwp'));
+    h += riga(C.acwp, 'ACWP costo effettivo', pt('acwp'));
+    if (ril) {
+      h += '<div class="tt-sep"></div>';
+      h += `<div class="tt-riga"><span>CV</span><b class="${ril.cv < 0 ? 'neg' : ril.cv > 0 ? 'pos' : ''}">${numeri.formatConSegno(ril.cv)} (${numeri.formatPercentuale(ril.pcv)})</b></div>`;
+      h += `<div class="tt-riga"><span>SV</span><b class="${ril.sv < 0 ? 'neg' : ril.sv > 0 ? 'pos' : ''}">${numeri.formatConSegno(ril.sv)} (${numeri.formatPercentuale(ril.psv)})</b></div>`;
+    } else if (pt('bcwp') === null || pt('acwp') === null) {
+      h += '<div class="tt-sep"></div><div class="tt-riga tt-nota"><span>— = non rilevato in questo periodo</span></div>';
+    }
+    if (nota) h += `<div class="tt-sep"></div><div class="tt-riga tt-nota"><span><b>Nota ${nota.n}:</b> ${esc(nota.testo)}</span></div>`;
+    tip.innerHTML = h;
+    tip.hidden = false;
+    guida.hidden = false;
+    const c = $('#contenitore-grafico').getBoundingClientRect();
+    const xg = g.px(k);
+    Object.assign(guida.style, { left: xg + 'px', top: g.oy + g.T + 'px', height: g.PH + 'px' });
+    const w = tip.offsetWidth, hh = tip.offsetHeight;
+    const xr = cx === undefined ? c.left + xg : cx;
+    let left = xr - c.left + 16;
+    if (left + w > c.width - 6) left = xr - c.left - w - 16;
+    left = Math.max(4, left);
+    let top = cy === undefined ? g.oy + g.T + 8 : cy - c.top - hh / 2;
+    top = Math.max(4, Math.min(top, c.height - hh - 4));
+    Object.assign(tip.style, { left: left + 'px', top: top + 'px' });
+  }
+
   function collegaZoom() {
     const cont = $('#contenitore-grafico');
     const sel = $('#selezione'), guida = $('#guida'), tip = $('#tooltip');
@@ -441,9 +557,27 @@
 
     cont.addEventListener('dblclick', () => { if (modello.valido) impostaVista({}); });
 
+    // Puntatori attivi: mouse, penna o dita (due dita = pizzico per lo zoom)
+    const dita = new Map();
+    let pizzico = null, tocco = null;
+    const distanza = () => { const [a, b] = [...dita.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+    const centroX = () => { const [a, b] = [...dita.values()]; return (a.x + b.x) / 2; };
+
     cont.addEventListener('pointerdown', e => {
       const g = geom();
-      if (!g || e.button !== 0 || !g.dentro(e.clientX, e.clientY)) return;
+      if (!g) return;
+      if (e.pointerType !== 'mouse') {
+        dita.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        cont.setPointerCapture(e.pointerId);
+        if (dita.size === 2) {
+          tocco = null;
+          pizzico = { d0: distanza(), cx: g.x(centroX()), assi: { ...modello.assi } };
+        } else if (dita.size === 1) {
+          tocco = { x0: e.clientX, y0: e.clientY, t0: Date.now(), mosso: false, g, assi: { ...modello.assi } };
+        }
+        return;
+      }
+      if (e.button !== 0 || !g.dentro(e.clientX, e.clientY)) return;
       const v = dati.grafico.vista || {};
       trascina = { tipo: e.shiftKey ? 'area' : 'sposta', x0: e.clientX, y0: e.clientY, g, assi: { ...modello.assi }, conY: Number.isFinite(v.ymin) && Number.isFinite(v.ymax) };
       if (trascina.tipo === 'sposta' && !modello.assi.zoomato) { trascina = null; return; }
@@ -453,6 +587,23 @@
       e.preventDefault();
     });
     cont.addEventListener('pointermove', e => {
+      if (e.pointerType !== 'mouse') {
+        if (!dita.has(e.pointerId)) return;
+        dita.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pizzico && dita.size === 2) {
+          const f = pizzico.d0 / Math.max(10, distanza());
+          const a = pizzico.assi, c = pizzico.cx;
+          impostaVista({ da: c - (c - a.xmin) * f, a: c + (a.xmax - c) * f });
+        } else if (tocco) {
+          const dx = e.clientX - tocco.x0;
+          if (Math.abs(dx) > 6 || Math.abs(e.clientY - tocco.y0) > 6) tocco.mosso = true;
+          if (tocco.mosso && tocco.assi.zoomato) {
+            const sp = dx / tocco.g.PW * (tocco.assi.xmax - tocco.assi.xmin);
+            impostaVista({ da: tocco.assi.xmin - sp, a: tocco.assi.xmax - sp });
+          }
+        }
+        return;
+      }
       if (trascina) {
         const t = trascina, g = t.g;
         if (t.tipo === 'area') {
@@ -468,9 +619,22 @@
         }
         return;
       }
-      mostraValori(e);
+      if (valoriFissi === null) mostraValori(e);
     });
     const fine = e => {
+      if (e.pointerType !== 'mouse') {
+        const era = tocco;
+        dita.delete(e.pointerId);
+        if (dita.size < 2) pizzico = null;
+        if (dita.size === 0) tocco = null;
+        // tocco breve senza movimento = mostra i valori di quel periodo (restano finché non tocchi altrove)
+        if (era && !era.mosso && Date.now() - era.t0 < 500) {
+          const g = geom();
+          if (g && g.dentro(e.clientX, e.clientY)) { valoriFissi = Math.round(g.x(e.clientX)); mostraValoriPeriodo(valoriFissi); }
+          else { valoriFissi = null; tip.hidden = true; guida.hidden = true; }
+        }
+        return;
+      }
       if (!trascina) return;
       const t = trascina;
       trascina = null;
@@ -483,44 +647,49 @@
       }
     };
     cont.addEventListener('pointerup', fine);
-    cont.addEventListener('pointercancel', fine);
-    cont.addEventListener('pointerleave', () => { if (!trascina) { tip.hidden = true; guida.hidden = true; } });
+    cont.addEventListener('pointercancel', e => { dita.delete(e.pointerId); pizzico = null; tocco = null; if (trascina) fine(e); });
+    cont.addEventListener('pointerleave', e => { if (!trascina && e.pointerType === 'mouse' && valoriFissi === null) { tip.hidden = true; guida.hidden = true; } });
 
-    /** Riquadro con i valori VERI del periodo sotto il mouse (mai valori inventati). */
     function mostraValori(e) {
       const g = geom();
       if (!g || !g.dentro(e.clientX, e.clientY)) { tip.hidden = true; guida.hidden = true; return; }
-      const m = modello;
-      const k = Math.round(g.x(e.clientX));
-      if (k < 0 || k > m.durata || k < m.assi.xmin - 1e-9 || k > m.assi.xmax + 1e-9) { tip.hidden = true; guida.hidden = true; return; }
-      const pt = s => { const p = m.punti[s].find(q => q[0] === k); return p ? p[1] : (k === 0 ? 0 : null); };
-      const ril = m.rilevamenti.find(r => r.t === k);
-      const C = grafico.TEMI[tema()];
-      const riga = (colore, nome, v) => `<div class="tt-riga"><span><span class="tt-punto" style="background:${colore}"></span>${nome}</span><b>${v === null ? '—' : numeri.formatNumero(v)}</b></div>`;
-      let h = `<div class="tt-titolo">${esc(ut().singolare[0].toUpperCase() + ut().singolare.slice(1))} ${k}${m.inizio ? ' · ' + esc(m.etichettaTempo(k)) : ''}${ril ? ` · rilevamento ${ril.n}` : ''}</div>`;
-      h += riga(C.bcws, 'BCWS pianificato', m.bcwsCum[k]);
-      h += riga(C.bcwp, 'BCWP lavoro svolto', pt('bcwp'));
-      h += riga(C.acwp, 'ACWP costo effettivo', pt('acwp'));
-      if (ril) {
-        h += '<div class="tt-sep"></div>';
-        h += `<div class="tt-riga"><span>CV</span><b class="${ril.cv < 0 ? 'neg' : ril.cv > 0 ? 'pos' : ''}">${numeri.formatConSegno(ril.cv)} (${numeri.formatPercentuale(ril.pcv)})</b></div>`;
-        h += `<div class="tt-riga"><span>SV</span><b class="${ril.sv < 0 ? 'neg' : ril.sv > 0 ? 'pos' : ''}">${numeri.formatConSegno(ril.sv)} (${numeri.formatPercentuale(ril.psv)})</b></div>`;
-      } else if (pt('bcwp') === null || pt('acwp') === null) {
-        h += '<div class="tt-sep"></div><div class="tt-riga"><span>— = valore non rilevato in questo periodo</span></div>';
-      }
-      tip.innerHTML = h;
-      tip.hidden = false;
-      guida.hidden = false;
-      const c = $('#contenitore-grafico').getBoundingClientRect();
-      const xg = g.px(k);
-      Object.assign(guida.style, { left: xg + 'px', top: g.oy + g.T + 'px', height: g.PH + 'px' });
-      const w = tip.offsetWidth, hh = tip.offsetHeight;
-      let left = e.clientX - c.left + 16;
-      if (left + w > c.width - 8) left = e.clientX - c.left - w - 16;
-      let top = e.clientY - c.top - hh / 2;
-      top = Math.max(4, Math.min(top, c.height - hh - 4));
-      Object.assign(tip.style, { left: left + 'px', top: top + 'px' });
+      mostraValoriPeriodo(Math.round(g.x(e.clientX)), e.clientX, e.clientY);
     }
+
+    // Navigatore: trascina il riquadro, allargalo dai bordi o clicca per spostarti
+    const nav = $('#navigatore');
+    let navT = null;
+    const navDati = cx => {
+      const svg = nav.querySelector('svg');
+      const r = svg.getBoundingClientRect(), k = r.width / svg.viewBox.baseVal.width;
+      const L = +svg.dataset.l * k, PW = +svg.dataset.pw * k, p = modello.assi.pieno;
+      return { x: p.xmin + (cx - r.left - L) / PW * (p.xmax - p.xmin), perPx: (p.xmax - p.xmin) / PW };
+    };
+    nav.addEventListener('pointerdown', e => {
+      if (!modello.valido || !nav.querySelector('svg')) return;
+      const { x, perPx } = navDati(e.clientX), a = modello.assi;
+      const bordo = 12 * perPx;
+      let tipo = 'sposta';
+      if (Math.abs(x - a.xmin) < bordo) tipo = 'sinistra';
+      else if (Math.abs(x - a.xmax) < bordo) tipo = 'destra';
+      else if (x < a.xmin || x > a.xmax) {
+        const amp = a.xmax - a.xmin;
+        impostaVista({ da: x - amp / 2, a: x + amp / 2 });
+      }
+      navT = { tipo, x0: x, assi: { ...modello.assi } };
+      nav.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    nav.addEventListener('pointermove', e => {
+      if (!navT) return;
+      const { x } = navDati(e.clientX), a = navT.assi, d = x - navT.x0;
+      if (navT.tipo === 'sposta') impostaVista({ da: a.xmin + d, a: a.xmax + d });
+      else if (navT.tipo === 'sinistra') impostaVista({ da: Math.min(a.xmin + d, a.xmax - 0.5), a: a.xmax });
+      else impostaVista({ da: a.xmin, a: Math.max(a.xmax + d, a.xmin + 0.5) });
+    });
+    const navFine = () => { navT = null; };
+    nav.addEventListener('pointerup', navFine);
+    nav.addEventListener('pointercancel', navFine);
 
     // Intervallo preciso
     const popI = $('#m-intervallo');
@@ -541,7 +710,7 @@
     $('#v-reimposta').addEventListener('click', () => { if (modello.valido) impostaVista({}); chiudiMenu(); });
 
     // Menu a comparsa
-    const menu = [['#b-intervallo', '#m-intervallo', apriIntervallo], ['#b-mostra', '#m-mostra', null]];
+    const menu = [['#b-intervallo', '#m-intervallo', apriIntervallo], ['#b-mostra', '#m-mostra', null], ['#b-altro', '#m-altro', null]];
     function chiudiMenu() { menu.forEach(([b, m]) => { $(m).hidden = true; $(b).setAttribute('aria-expanded', 'false'); }); }
     menu.forEach(([b, m, apri]) => {
       $(b).addEventListener('click', e => {
@@ -552,7 +721,12 @@
       });
       $(m).addEventListener('click', e => e.stopPropagation());
     });
-    document.addEventListener('click', chiudiMenu);
+    document.addEventListener('click', e => {
+      chiudiMenu();
+      // un tocco fuori dal grafico nasconde i valori fissati
+      if (valoriFissi !== null && !e.target.closest('#contenitore-grafico')) { valoriFissi = null; $('#tooltip').hidden = true; $('#guida').hidden = true; }
+    });
+    $('#m-altro').addEventListener('click', e => { if (e.target.closest('.voce')) chiudiMenu(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiMenu(); });
     popI.addEventListener('keydown', e => { if (e.key === 'Enter') $('#v-applica').click(); });
 
@@ -600,8 +774,8 @@
   function aggiornaFinestra() {
     const f = $('input[name="formato"]:checked').value;
     $('.azioni-tex').hidden = f !== 'tex';
-    $('.opzioni-pagina').hidden = f === 'svg';
-    $('#btn-scarica-testo').textContent = { pdf: 'Scarica PDF', tex: 'Scarica .tex', svg: 'Scarica SVG', stampa: 'Stampa' }[f];
+    $('.opzioni-pagina').hidden = f === 'svg' || f === 'csv';
+    $('#btn-scarica-testo').textContent = { pdf: 'Scarica PDF', tex: 'Scarica .tex', svg: 'Scarica SVG', stampa: 'Stampa', csv: 'Scarica CSV' }[f];
   }
 
   function opzioniDaFinestra() {
@@ -627,6 +801,9 @@
     if (f === 'tex') {
       scarica(nome, latex.genera(m), 'application/x-tex;charset=utf-8');
       messaggioEsporta('File .tex scaricato: si compila con pdflatex o su Overleaf.', 'ok');
+    } else if (f === 'csv') {
+      scarica(nome.replace(/\.tex$/, '.csv'), importa.tabellaCSV(m), 'text/csv;charset=utf-8');
+      messaggioEsporta('Tabella CSV scaricata: si apre con Excel.', 'ok');
     } else if (f === 'svg') {
       scarica(nome.replace(/\.tex$/, '.svg'), grafico.disegna(m, { tema: 'chiaro' }), 'image/svg+xml');
       messaggioEsporta('Immagine SVG scaricata.', 'ok');
@@ -665,6 +842,156 @@
     if (esempioAttivo) esempioAttivo = null;
     if (ricostruisci) costruisciTabelle();
     programmaAggiorna();
+    registraStoria();
+  }
+
+  // ---------------------------------------------------------------------
+  // Annulla / ripristina
+  // ---------------------------------------------------------------------
+  function registraStoria() {
+    clearTimeout(timerStoria);
+    timerStoria = setTimeout(() => {
+      const ora = JSON.stringify(dati);
+      if (ora === ultimoStato) return;
+      if (ultimoStato) storia.push(ultimoStato);
+      if (storia.length > 100) storia.shift();
+      futuro.length = 0;
+      ultimoStato = ora;
+      aggiornaPulsantiStoria();
+    }, 450);
+  }
+  function aggiornaPulsantiStoria() {
+    const a = $('#btn-annulla'), r = $('#btn-ripristina');
+    if (a) a.disabled = storia.length === 0;
+    if (r) r.disabled = futuro.length === 0;
+  }
+  function viaggia(da, verso) {
+    clearTimeout(timerStoria);
+    const ora = JSON.stringify(dati);
+    if (ora !== ultimoStato && ultimoStato) { da.push(ultimoStato); ultimoStato = ora; }
+    if (!da.length) return;
+    verso.push(ultimoStato);
+    ultimoStato = da.pop();
+    dati = JSON.parse(ultimoStato);
+    riempiModulo();
+    aggiorna();
+    aggiornaPulsantiStoria();
+  }
+  const annulla = () => viaggia(storia, futuro);
+  const ripristina = () => viaggia(futuro, storia);
+
+  // ---------------------------------------------------------------------
+  // Link da condividere (il progetto viaggia nel link, dopo il #:
+  // la parte dopo il # non viene mai inviata al server)
+  // ---------------------------------------------------------------------
+  const b64 = bytes => { let bin = ''; bytes.forEach(c => { bin += String.fromCharCode(c); }); return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const daB64 = t => Uint8Array.from(atob(t.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+  async function codifica(oggetto) {
+    const testo = new TextEncoder().encode(JSON.stringify(oggetto));
+    if (window.CompressionStream) {
+      const flusso = new Blob([testo]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+      return 'z' + b64(new Uint8Array(await new Response(flusso).arrayBuffer()));
+    }
+    return 'b' + b64(testo);
+  }
+  async function decodifica(t) {
+    const bytes = daB64(t.slice(1));
+    if (t[0] === 'z') {
+      const flusso = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      return JSON.parse(await new Response(flusso).text());
+    }
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }
+  async function creaLink() { return location.href.split('#')[0] + '#p=' + await codifica(datiPerFile()); }
+  async function copiaLink() {
+    let url;
+    try { url = await creaLink(); } catch (e) { avviso('Non sono riuscito a creare il link in questo browser.', true); return; }
+    try { await navigator.clipboard.writeText(url); avviso('Link copiato: chi lo apre vede questo progetto (i dati sono dentro il link).'); }
+    catch (e) { window.prompt('Copia questo link:', url); }
+  }
+  async function apriDaLink() {
+    const m = /#p=([A-Za-z0-9_-]+)/.exec(location.hash);
+    if (!m) return false;
+    try {
+      const d = await decodifica(m[1]);
+      history.replaceState(null, '', location.pathname + location.search);
+      carica(d, null, { mostraTutti: true });
+      mostraPasso(4);
+      if (window.matchMedia('(max-width: 900px)').matches) vaiAScheda('grafico');
+      avviso('Progetto aperto dal link.');
+      return true;
+    } catch (e) { avviso('Il link non contiene un progetto valido.', true); return false; }
+  }
+
+  // ---------------------------------------------------------------------
+  // Messaggi brevi (in basso)
+  // ---------------------------------------------------------------------
+  function avviso(testo, errore) {
+    let el = $('#avviso-breve');
+    if (!el) { el = document.createElement('div'); el.id = 'avviso-breve'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.textContent = testo;
+    el.className = 'avviso-breve visibile' + (errore ? ' errore' : '');
+    clearTimeout(avviso.t);
+    avviso.t = setTimeout(() => { el.className = 'avviso-breve' + (errore ? ' errore' : ''); }, 4200);
+  }
+
+  // ---------------------------------------------------------------------
+  // Importazione da Excel / CSV
+  // ---------------------------------------------------------------------
+  let analisiImporta = null;
+  function apriImporta() {
+    $('#testo-importa').value = '';
+    $('#anteprima-importa').innerHTML = '';
+    $('#btn-conferma-importa').disabled = true;
+    analisiImporta = null;
+    $('#finestra-importa').showModal();
+  }
+  function analizzaImporta(testo) {
+    const a = importa.analizza(testo);
+    analisiImporta = a.errore ? null : a;
+    $('#btn-conferma-importa').disabled = !analisiImporta;
+    if (a.errore) { $('#anteprima-importa').innerHTML = `<p class="msg errore">${esc(a.errore)}</p>`; return; }
+    const v = x => (x === null ? '<span class="vuoto-cella">—</span>' : numeri.formatNumero(x));
+    const colPiano = a.pianoCol === 'costo' ? 'Costo nel periodo' : 'BCWS';
+    $('#anteprima-importa').innerHTML = `<p class="aiuto-breve">Trovati <strong>${a.righe.length} periodi</strong>. Anteprima:</p>
+      <div class="scorri"><table class="tabella-dati tabella-anteprima"><thead><tr><th>Periodo</th><th>${colPiano}</th><th>BCWP</th><th>ACWP</th></tr></thead><tbody>
+      ${a.righe.slice(0, 6).map(r => `<tr><td>${r.periodo}</td><td>${v(a.pianoCol ? r[a.pianoCol] : null)}</td><td>${v(r.bcwp)}</td><td>${v(r.acwp)}</td></tr>`).join('')}
+      ${a.righe.length > 6 ? `<tr><td colspan="4">… altri ${a.righe.length - 6}</td></tr>` : ''}</tbody></table></div>
+      ${a.avvisi.map(x => `<p class="msg avviso">${esc(x)}</p>`).join('')}`;
+  }
+  function confermaImporta() {
+    if (!analisiImporta) return;
+    const proposta = importa.inDati(analisiImporta, dati);
+    const base = datiPerFile();
+    carica({ ...base, ...proposta, titolo: base.titolo || 'Progetto importato' }, null, { mostraTutti: true });
+    $('#finestra-importa').close();
+    mostraPasso(modello.valido ? 4 : 3);
+    if (window.matchMedia('(max-width: 900px)').matches) vaiAScheda(modello.valido ? 'grafico' : 'dati');
+    avviso(`Importati ${analisiImporta.righe.length} periodi. Controlla i rilevamenti scelti nel passo 3.`);
+  }
+
+  // ---------------------------------------------------------------------
+  // Telefono: schede in basso e grafico a tutto schermo in orizzontale
+  // ---------------------------------------------------------------------
+  let passoDati = 1, pienoChiuso = false;
+  function vaiAScheda(nome) {
+    const prima = document.body.dataset.scheda;
+    document.body.dataset.scheda = nome;
+    $$('.schede-mobile button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.scheda === nome)));
+    if (nome === 'risultati') { if (passo !== 4) passoDati = passo; mostraPasso(4); }
+    else if (nome === 'dati' && prima === 'risultati') mostraPasso(passoDati === 4 ? 1 : passoDati);
+    controllaOrizzontale();
+    if (modello) requestAnimationFrame(() => disegnaGrafico());
+    if (window.matchMedia('(max-width: 900px)').matches) window.scrollTo({ top: 0 });
+  }
+  const mqOrizz = window.matchMedia('(orientation: landscape) and (max-height: 520px)');
+  function controllaOrizzontale() {
+    const pieno = Boolean(mqOrizz.matches && !pienoChiuso && document.body.dataset.scheda === 'grafico' && modello && modello.valido);
+    if (pieno !== document.body.classList.contains('grafico-pieno')) {
+      document.body.classList.toggle('grafico-pieno', pieno);
+      $('#chiudi-pieno').hidden = !pieno;
+      requestAnimationFrame(() => disegnaGrafico());
+    }
   }
 
   function incolla(e, colonne) {
@@ -804,6 +1131,109 @@
       }
     });
 
+    // note sul grafico
+    $('#btn-aggiungi-nota').addEventListener('click', () => {
+      dati.note.push({ periodo: '', testo: '' });
+      costruisciNote();
+      $(`#f-nota-${dati.note.length - 1}-periodo`).focus();
+      datoModificato();
+    });
+    $('#elenco-note').addEventListener('input', e => {
+      const riga = e.target.closest('.riga-nota');
+      if (!riga) return;
+      dati.note[Number(riga.dataset.i)][e.target.dataset.k] = e.target.value;
+      datoModificato();
+    });
+    $('#elenco-note').addEventListener('click', e => {
+      const b = e.target.closest('[data-togli-nota]');
+      if (!b) return;
+      dati.note.splice(Number(b.dataset.togliNota), 1);
+      costruisciNote();
+      datoModificato();
+    });
+
+    // legenda cliccabile: mostra / nascondi le curve
+    $('#legenda-grafico').addEventListener('click', e => {
+      const b = e.target.closest('[data-curva]');
+      if (!b) return;
+      const k = b.dataset.curva;
+      dati.grafico.mostra[k] = dati.grafico.mostra[k] === false;
+      registraStoria();
+      aggiorna();
+    });
+
+    // solo grafico (PC): il pannello dei dati si richiude
+    $('#b-focus').addEventListener('click', () => {
+      const on = !document.body.classList.contains('solo-grafico');
+      document.body.classList.toggle('solo-grafico', on);
+      $('#b-focus').setAttribute('aria-pressed', String(on));
+      $('#b-focus').title = on ? 'Mostra di nuovo il pannello dei dati' : 'Solo grafico: nasconde il pannello dei dati';
+      try { localStorage.setItem('costcurve:solo-grafico', on ? '1' : '0'); } catch (err) { /* niente */ }
+      requestAnimationFrame(() => disegnaGrafico());
+    });
+
+    // schede del telefono e grafico in orizzontale
+    $$('.schede-mobile button').forEach(b => b.addEventListener('click', () => vaiAScheda(b.dataset.scheda)));
+    mqOrizz.addEventListener('change', () => { pienoChiuso = false; controllaOrizzontale(); });
+    $('#chiudi-pieno').addEventListener('click', () => { pienoChiuso = true; controllaOrizzontale(); });
+
+    // ridisegno quando cambia la larghezza (finestra, rotazione, pannello)
+    let ultimaLarghezza = 0;
+    new ResizeObserver(voci => {
+      const w = Math.round(voci[0].contentRect.width);
+      if (Math.abs(w - ultimaLarghezza) < 2 || !modello) return;
+      ultimaLarghezza = w;
+      requestAnimationFrame(() => disegnaGrafico());
+    }).observe($('#contenitore-grafico'));
+    let timerAltezza = null;
+    window.addEventListener('resize', () => { clearTimeout(timerAltezza); timerAltezza = setTimeout(() => { if (modello) { controllaOrizzontale(); disegnaGrafico(); } }, 150); });
+
+    // annulla / ripristina (scorciatoie fuori dai campi: dentro un campo vale l'annulla del campo)
+    $('#btn-annulla').addEventListener('click', annulla);
+    $('#btn-ripristina').addEventListener('click', ripristina);
+    document.addEventListener('keydown', e => {
+      if (!(e.ctrlKey || e.metaKey) || document.body.classList.contains('in-presentazione')) return;
+      if (e.target.closest && e.target.closest('input, textarea, select')) return;
+      const tasto = e.key.toLowerCase();
+      if (tasto === 'z' && !e.shiftKey) { e.preventDefault(); annulla(); }
+      else if (tasto === 'y' || (tasto === 'z' && e.shiftKey)) { e.preventDefault(); ripristina(); }
+    });
+
+    // sintesi da copiare
+    $('#btn-copia-sintesi').addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(modello.riassunto); avviso('Frase copiata negli appunti.'); }
+      catch (err) { avviso('Il browser non permette la copia automatica: seleziona la frase e copiala.', true); }
+    });
+
+    // menu "Altro" e pulsanti con un'azione
+    let richiestaInstallazione = null;
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); richiestaInstallazione = e; $('[data-azione="installa"]').hidden = false; });
+    const eseguiAzione = b => {
+      const a = b.dataset.azione;
+      if (a === 'annulla') annulla();
+      else if (a === 'ripristina') ripristina();
+      else if (a === 'nuovo') $('#btn-nuovo').click();
+      else if (a === 'apri') $('#btn-apri').click();
+      else if (a === 'salva') $('#btn-salva').click();
+      else if (a === 'importa') apriImporta();
+      else if (a === 'link') copiaLink();
+      else if (a === 'presenta') window.CC.presentazione.apri();
+      else if (a === 'installa' && richiestaInstallazione) { richiestaInstallazione.prompt(); richiestaInstallazione = null; b.hidden = true; }
+    };
+    // i pulsanti con un'azione (anche dentro il menu "Altro", che ferma la propagazione dei clic)
+    document.addEventListener('click', e => { const b = e.target.closest('[data-azione]'); if (b && !b.closest('#m-altro')) eseguiAzione(b); });
+    $('#m-altro').addEventListener('click', e => { const b = e.target.closest('[data-azione]'); if (b) eseguiAzione(b); });
+
+    // finestra Importa
+    $('#testo-importa').addEventListener('input', e => analizzaImporta(e.target.value));
+    const leggiFile = file => { const r = new FileReader(); r.onload = () => { $('#testo-importa').value = r.result; analizzaImporta(r.result); }; r.readAsText(file); };
+    $('#file-importa').addEventListener('change', e => { if (e.target.files[0]) leggiFile(e.target.files[0]); e.target.value = ''; });
+    const zona = $('#zona-file');
+    zona.addEventListener('dragover', e => { e.preventDefault(); zona.classList.add('sopra'); });
+    zona.addEventListener('dragleave', () => zona.classList.remove('sopra'));
+    zona.addEventListener('drop', e => { e.preventDefault(); zona.classList.remove('sopra'); if (e.dataTransfer.files[0]) leggiFile(e.dataTransfer.files[0]); });
+    $('#btn-conferma-importa').addEventListener('click', confermaImporta);
+
     // passo 3: rilevamenti
     [0, 1].forEach(i => ['periodo', 'bcwp', 'acwp'].forEach(k => {
       $(`#f-ril-${i}-${k}`).addEventListener('input', e => { dati.rilevamenti[i][k] = e.target.value; datoModificato(); });
@@ -897,6 +1327,7 @@
     if (!esempioAttivo && haDati() && !confirm('Caricare l\'esempio sostituisce i dati attuali (se ti servono, prima usa "Salva"). Continuare?')) return;
     carica(JSON.parse(JSON.stringify(es.dati)), es.id, { mostraTutti: true });
     mostraPasso(4);
+    if (window.matchMedia('(max-width: 900px)').matches) vaiAScheda('grafico');
   }
 
   function aggiornaPulsanteTema() {
@@ -907,10 +1338,15 @@
   // ---------------------------------------------------------------------
   // Avvio
   // ---------------------------------------------------------------------
-  function avvia() {
+  async function avvia() {
     collegaEventi();
     collegaZoom();
     aggiornaPulsanteTema();
+    document.body.dataset.scheda = 'dati';
+    try { if (localStorage.getItem('costcurve:solo-grafico') === '1') { document.body.classList.add('solo-grafico'); $('#b-focus').setAttribute('aria-pressed', 'true'); } } catch (e) { /* niente */ }
+    window.CC.app = { dati: () => dati, modello: () => modello, avviso, creaLink };
+    // app installabile (funziona da un sito web, non aprendo il file con un doppio clic)
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
     const salvato = leggiDalBrowser();
     if (salvato && salvato.dati) {
       carica(salvato.dati, salvato.esempio, { mostraTutti: true });
@@ -920,6 +1356,13 @@
       carica(calcoli.datiVuoti(), null, { durataVuota: true });
       mostraPasso(1);
     }
+    // un progetto condiviso con un link ha la precedenza (anche se il link si apre nella stessa scheda)
+    const daLink = async () => {
+      if (!/#p=/.test(location.hash)) return;
+      if (!haDati() || esempioAttivo || confirm('Aprire il progetto contenuto nel link? Sostituisce quello attuale (se ti serve, prima salvalo).')) await apriDaLink();
+    };
+    window.addEventListener('hashchange', daLink);
+    await daLink();
   }
 
   avvia();

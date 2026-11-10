@@ -10,7 +10,7 @@ const { trova } = require('../js/esempi.js');
 
 const [, , sorgente, uscita, extra] = process.argv;
 const dati = JSON.parse(JSON.stringify(existsSync(sorgente) ? JSON.parse(readFileSync(sorgente, 'utf8')) : trova(sorgente).dati));
-if (extra) { const e = JSON.parse(extra); for (const k of Object.keys(e)) dati[k] = Object.assign({}, dati[k] || {}, e[k]); }
+if (extra) { const e = JSON.parse(extra); for (const k of Object.keys(e)) dati[k] = Array.isArray(e[k]) ? e[k] : Object.assign({}, dati[k] || {}, e[k]); }
 const d = calcoli.normalizza(dati);
 const modello = calcoli.calcola(dati, { vistaIntera: d.esporta.vista !== 'attuale' });
 if (!modello.valido) { console.error(modello.problemi); process.exit(1); }
