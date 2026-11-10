@@ -1,9 +1,10 @@
 /* =====================================================================
  * sw.js — fa funzionare CostCurve come app installata, anche offline.
  * Tiene in memoria i file del sito; se c'è la rete, li aggiorna.
- * Cambia VERSIONE quando pubblichi una nuova versione del sito.
+ * Quando pubblichi una nuova versione cambia VERSIONE qui e il ?v= dei
+ * file css/js in index.html, così nessun browser tiene file vecchi.
  * ===================================================================== */
-const VERSIONE = 'costcurve-v3.0';
+const VERSIONE = 'costcurve-v3.0.1';
 const FILE = [
   './', 'index.html', 'manifest.webmanifest', 'css/stile.css', 'css/stampa.css',
   'js/numeri.js', 'js/calcoli.js', 'js/esempi.js', 'js/grafico.js', 'js/latex.js', 'js/report.js',
@@ -13,7 +14,7 @@ const FILE = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSIONE).then(c => c.addAll(FILE)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSIONE).then(c => c.addAll(FILE.map(f => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(chiavi => Promise.all(chiavi.filter(k => k !== VERSIONE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
@@ -22,7 +23,9 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
-    fetch(e.request).then(r => {
+    // no-cache: chiede sempre al server se il file è cambiato (niente file vecchi dalla cache del browser)
+    fetch(e.request, { cache: 'no-cache' }).then(r => {
+      if (!r.ok) return r;
       const copia = r.clone();
       caches.open(VERSIONE).then(c => c.put(e.request, copia));
       return r;
