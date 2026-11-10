@@ -1,12 +1,21 @@
 {
   "formato": "costcurve",
-  "versione": 1,
+  "versione": 2,
   "titolo": "Esempio del libro (pag. 199)",
+  "nota": "Rilevamento 1: dati del libro (pag. 199). Piano mensile e rilevamento 2: dati inventati.",
+  "report": {
+    "pm": "",
+    "azienda": "",
+    "data": "",
+    "commento": ""
+  },
   "unitaTempo": "mesi",
   "unitaMoneta": "euro",
+  "dataInizio": "",
   "durata": 23,
   "bac": 540000,
-  "costiPeriodo": [
+  "modoPiano": "periodo",
+  "piano": [
     4000,
     6000,
     8000,
@@ -31,6 +40,8 @@
     10000,
     6000
   ],
+  "modoAvanzamento": "rilevamenti",
+  "numeroRilevamenti": 2,
   "rilevamenti": [
     {
       "periodo": 10,
@@ -43,6 +54,80 @@
       "acwp": 420000
     }
   ],
-  "mostraPrevisione": true,
-  "nota": "Rilevamento 1: dati del libro (pag. 199). Piano mensile e rilevamento 2: dati inventati."
+  "avanzamento": [
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    }
+  ],
+  "previsione": "auto",
+  "previsioneManuale": {
+    "eac": null,
+    "fine": null
+  },
+  "grafico": {
+    "proporzioni": 1.6,
+    "vista": {
+      "da": null,
+      "a": null,
+      "ymin": null,
+      "ymax": null
+    },
+    "mostra": {
+      "bcws": true,
+      "bcwp": true,
+      "acwp": true,
+      "frecce": true,
+      "etichette": true
+    }
+  },
+  "esporta": {
+    "pagina": "stessa",
+    "dimensione": "normale",
+    "vista": "intera"
+  }
 }

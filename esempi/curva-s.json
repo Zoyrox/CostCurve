@@ -1,22 +1,33 @@
 {
   "formato": "costcurve",
-  "versione": 1,
+  "versione": 2,
   "titolo": "Planned Value (S curve) - pag. 198",
+  "nota": "Piano: dati del libro (pag. 198). Rilevamenti: dati inventati.",
+  "report": {
+    "pm": "",
+    "azienda": "",
+    "data": "",
+    "commento": ""
+  },
   "unitaTempo": "settimane",
   "unitaMoneta": "euro",
+  "dataInizio": "",
   "durata": 9,
   "bac": 150,
-  "costiPeriodo": [
+  "modoPiano": "cumulato",
+  "piano": [
     5,
-    5,
-    15,
-    30,
-    30,
-    35,
     10,
-    10,
-    10
+    25,
+    55,
+    85,
+    120,
+    130,
+    140,
+    150
   ],
+  "modoAvanzamento": "rilevamenti",
+  "numeroRilevamenti": 2,
   "rilevamenti": [
     {
       "periodo": 4,
@@ -29,6 +40,80 @@
       "acwp": 140
     }
   ],
-  "mostraPrevisione": true,
-  "nota": "Piano: dati del libro (pag. 198). Rilevamenti: dati inventati."
+  "avanzamento": [
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    }
+  ],
+  "previsione": "auto",
+  "previsioneManuale": {
+    "eac": null,
+    "fine": null
+  },
+  "grafico": {
+    "proporzioni": 1.6,
+    "vista": {
+      "da": null,
+      "a": null,
+      "ymin": null,
+      "ymax": null
+    },
+    "mostra": {
+      "bcws": true,
+      "bcwp": true,
+      "acwp": true,
+      "frecce": true,
+      "etichette": true
+    }
+  },
+  "esporta": {
+    "pagina": "stessa",
+    "dimensione": "normale",
+    "vista": "intera"
+  }
 }

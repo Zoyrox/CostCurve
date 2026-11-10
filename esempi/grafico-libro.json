@@ -1,0 +1,97 @@
+{
+  "formato": "costcurve",
+  "versione": 2,
+  "titolo": "Period breakdown of progress analysis",
+  "nota": "Valori letti dalla figura del libro, pag. 199 (approssimati al decimo).",
+  "report": {
+    "pm": "",
+    "azienda": "",
+    "data": "",
+    "commento": ""
+  },
+  "unitaTempo": "mesi",
+  "unitaMoneta": "migliaia",
+  "dataInizio": "",
+  "durata": 7,
+  "bac": 3.7,
+  "modoPiano": "cumulato",
+  "piano": [
+    0,
+    0.25,
+    0.75,
+    1.6,
+    2.6,
+    3.35,
+    3.7
+  ],
+  "modoAvanzamento": "periodi",
+  "numeroRilevamenti": 1,
+  "rilevamenti": [
+    {
+      "periodo": 5,
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "periodo": null,
+      "bcwp": null,
+      "acwp": null
+    }
+  ],
+  "avanzamento": [
+    {
+      "bcwp": 0,
+      "acwp": 0
+    },
+    {
+      "bcwp": 0.12,
+      "acwp": 0.65
+    },
+    {
+      "bcwp": 0.3,
+      "acwp": 1.9
+    },
+    {
+      "bcwp": 0.6,
+      "acwp": 4
+    },
+    {
+      "bcwp": 0.9,
+      "acwp": 5.35
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    }
+  ],
+  "previsione": "manuale",
+  "previsioneManuale": {
+    "eac": 7.2,
+    "fine": 7.9
+  },
+  "grafico": {
+    "proporzioni": 1.6,
+    "vista": {
+      "da": null,
+      "a": null,
+      "ymin": null,
+      "ymax": null
+    },
+    "mostra": {
+      "bcws": true,
+      "bcwp": true,
+      "acwp": true,
+      "frecce": true,
+      "etichette": true
+    }
+  },
+  "esporta": {
+    "pagina": "stessa",
+    "dimensione": "normale",
+    "vista": "intera"
+  }
+}

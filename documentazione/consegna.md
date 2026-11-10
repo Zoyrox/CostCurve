@@ -39,9 +39,46 @@
 - "Apri in Overleaf";
 - PDF diretto con grafico vettoriale.
 
-**Facoltativa non fatta:** il tema scuro.
+**Facoltativa non fatta (versione 1):** il tema scuro, poi aggiunto nella versione 2.
 
-## 2. Verifiche eseguite (Fase 5)
+
+## 1b. Versione 2 (dopo la revisione con il project manager)
+
+Richieste del project manager e cosa è stato fatto:
+
+| Richiesta | Fatto |
+|---|---|
+| Poter ricreare **qualunque** grafico, anche quello del libro | BCWP/ACWP **per periodo**; **1 o 2** rilevamenti; piano come **totale progressivo**; previsione **inserita a mano**. Esempio "Grafico del libro" incluso. |
+| **Zoom** per vedere meglio, restando veritiero | pulsanti − + ↺, Ctrl + rotellina, trascinamento, Maiusc + trascina (area), intervallo preciso, schermo intero; gli assi si ricalcolano e l'asse spezzato è segnalato (≈) |
+| Grafico grande anche nel PDF, **a scelta** | finestra Esporta: pagina verticale oppure **orizzontale dedicata**, dimensione normale/grande/massima, vista intera o zoomata, proporzioni; vale per PDF, .tex e stampa |
+| Stile meno "da AI", minimale e professionale | restyling completo: superfici neutre, un solo blu d'accento, font di sistema, niente decorazioni |
+| Tema scuro | pulsante luna/sole, ricordato dal browser |
+| Partenza da progetto vuoto (approvato) | riquadro "Inizia un nuovo progetto" con gli esempi a un clic |
+| Date reali (facoltative) | data di inizio: le date compaiono sull'asse, nelle tabelle, nel PDF e nel .tex |
+| Dati del resoconto (facoltativi) | project manager, azienda, data e commento nel report, nel PDF e nel .tex |
+| Valori al passaggio del mouse | riquadro con i valori **veri** del periodo ("—" dove non rilevati) |
+| Mostrare/nascondere le curve | menu "Mostra" (curve, frecce CV/SV, etichette), anche negli export |
+
+### Verifiche della versione 2
+
+| Prova | Risultato |
+|---|---|
+| Test automatici (`npm test`) | 23/23 superati (8 nuovi: dati per periodo, 1 rilevamento, piano cumulato, previsione manuale, zoom, date, compatibilità con i progetti salvati prima) |
+| Sito ↔ `.tex` compilato (`strumenti/verifica-tex.mjs`) | 7 casi, fino a 33 valori ciascuno: **0 differenze**, 0 errori e 0 avvisi di LaTeX |
+| Varianti del `.tex` | pagina orizzontale con dimensione massima, vista zoomata con asse spezzato, grafico alto senza BCWP, date, 2 e 120 periodi: tutte compilano senza avvisi |
+| Flusso nel browser (`strumenti/prova-flusso.mjs`) | **24/24**: grafico del libro ricreato a mano, errori chiari, zoom con i 4 comandi, valori al passaggio del mouse, curve nascoste, export di .tex, PDF orizzontale e verticale, SVG, stampa, tema, salvataggio e apertura |
+| Aspetto (`strumenti/prova-sito.mjs`) | PC chiaro e scuro, telefono: 0 errori in console, nessuno scorrimento orizzontale |
+| PDF del sito e stampa | grafico vettoriale (0 immagini raster); pagina orizzontale dedicata quando scelta |
+
+**Problemi trovati e risolti nella versione 2:**
+- **Date:** "31 gennaio + 1 mese" dava marzo; ora dà fine febbraio.
+- **Tacche dell'asse:** con passo 2,5 i decimali venivano tolti, ora sono giusti.
+- **.tex in pagina orizzontale:** il grafico non ci stava; corretto lo spazio riservato.
+- **Stampa orizzontale:** una pagina bianca iniziale in Chromium, risolta.
+- **Tabella per periodo:** la riga del rilevamento era scomposta per un nome di stile in conflitto.
+- **Etichetta EAC:** veniva tagliata al bordo del grafico.
+
+## 2. Verifiche eseguite (Fase 5, versione 1)
 
 | Prova | Risultato |
 |---|---|
@@ -118,3 +155,9 @@ Sì, ed è voluto: il prototipo LaTeX (A3) è partito il primo giorno, in parall
 (pianificazione a onde successive), perché LaTeX era il rischio più grave e conveniva scoprirlo subito.
 Il rischio è la rilavorazione: l'abbiamo limitato con un prototipo usa e getta di mezz'ora e una
 riserva di 3 ore.
+
+**6. Lo zoom non "falsa" il grafico?**
+No. Non è un ingrandimento dell'immagine: il programma ricalcola gli assi sull'intervallo scelto, con le
+tacche vere, e taglia le curve ai bordi. Se l'asse dei costi non parte più da zero, il grafico lo
+dichiara con il simbolo ≈ sull'asse e una riga nella legenda ("asse dei costi da 200.000"). La stessa
+vista, se si sceglie, finisce identica nel PDF e nel .tex.

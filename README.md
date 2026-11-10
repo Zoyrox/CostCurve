@@ -1,8 +1,8 @@
 # CostCurve — diagramma costi-tempi con export LaTeX
 
-Sito web per il **project manager**: inserisci il piano a budget e due rilevamenti e ottieni subito
+Sito web per il **project manager**: inserisci il piano a budget e i rilevamenti e ottieni subito
 il diagramma costi-tempi (curve **BCWS**, **BCWP**, **ACWP**), la tabella, la legenda dei parametri,
-gli indicatori **CV, SV, %CV, %SV** e il file **.tex** pronto da compilare.
+gli indicatori **CV, SV, %CV, %SV**, il report PDF e il file **.tex** pronto da compilare.
 
 Progetto di GPOI (Gestione Progetto e Organizzazione d'Impresa). Formule dal libro di testo, pagg. 198-199.
 
@@ -11,20 +11,26 @@ Progetto di GPOI (Gestione Progetto e Organizzazione d'Impresa). Formule dal lib
 - **Pianificazione del progetto**: [`documentazione/pianificazione/pianificazione.pdf`](documentazione/pianificazione/pianificazione.pdf) (copia modificabile `.odt`)
 - **Progettazione**: [`documentazione/progettazione.md`](documentazione/progettazione.md)
 - **Consegna, verifiche e domande**: [`documentazione/consegna.md`](documentazione/consegna.md)
-- **Esempio di .tex compilato**: [`documentazione/esempio-tex/`](documentazione/esempio-tex/)
+- **Esempi di .tex compilati**: [`documentazione/esempio-tex/`](documentazione/esempio-tex/), compreso il grafico del libro ricreato
 
 ## Cosa fa
 
 | Richiesta della consegna | Dove si trova |
 |---|---|
-| Diagramma con 3 curve e 2 monitoraggi | anteprima del sito, PDF, file .tex |
-| Tabella e legenda dei parametri | sezione "Report" del sito, PDF, file .tex |
+| Diagramma con 3 curve e 2 monitoraggi | grafico del sito, PDF, file .tex (anche 1 solo rilevamento, se serve) |
+| Tabella e legenda dei parametri | report sotto il grafico, PDF, file .tex |
 | Calcolo percentuale dell'andamento | %CV e %SV per ogni rilevamento, con semaforo e frase |
-| Output in formato .tex | pulsante **Scarica il file .tex** (passo 4) |
+| Output in formato .tex | pulsante **Esporta → File LaTeX** |
 | Pianificazione con risorse e tempi | `documentazione/pianificazione/` |
 
+In più:
+- **Dati:** BCWP e ACWP si inseriscono ai rilevamenti oppure periodo per periodo, quindi qualunque grafico si può ricreare (anche quello del libro). La previsione si può calcolare o inserire a mano, e sull'asse ci possono essere le date reali.
+- **Grafico:** zoom veritiero (pulsanti, Ctrl + rotellina, trascinamento, Maiusc + trascina, intervallo preciso, schermo intero), valori veri al passaggio del mouse, curve attivabili e proporzioni a scelta.
+- **Esportazione:** report PDF, `.tex`, SVG o stampa, con la pagina del grafico verticale oppure orizzontale dedicata, la dimensione del grafico e la vista intera o zoomata.
+- **Aspetto:** tema chiaro o scuro.
+
 Il file .tex è **parametrico**: ha una sezione `DATI` (numeri da modificare) separata dalla sezione
-`DISEGNO`, e tutti i calcoli (CV, SV, percentuali, curve, tabelle) li fa LaTeX. Se cambi un numero
+`DISEGNO`, e tutti i calcoli (CV, SV, percentuali, curve, assi, tabelle) li fa LaTeX. Se cambi un numero
 nei DATI e ricompili, cambia tutto il documento.
 
 ## Struttura dei file
@@ -37,7 +43,7 @@ js/calcoli.js         modello, formule, controlli, curve, assi (puro, senza pagi
 js/grafico.js         disegno SVG del diagramma
 js/latex.js           generatore del file .tex
 js/report.js          tabelle, legenda, frasi
-js/pdf.js             "Scarica PDF" (usa le librerie in vendor/)
+js/pdf.js             report PDF (usa le librerie in vendor/)
 js/esempi.js          esempi precaricati
 js/interfaccia.js     collega pagina, modello e output
 vendor/               jsPDF 4.2.1 e svg2pdf.js 2.9.0 (MIT), inclusi: niente CDN

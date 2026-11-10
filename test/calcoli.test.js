@@ -128,11 +128,11 @@ test('Test 4 — rilevamenti coincidenti o in ordine sbagliato', () => {
 test('Test 4 — cumulati che calano, negativi, BCWP oltre il budget, campi vuoti', () => {
   let d = base(); d.rilevamenti[1].acwp = 100000;
   assert.deepEqual(errori(C.calcola(d)), ['ril-1-acwp']);
-  d = base(); d.costiPeriodo[3] = -5;
+  d = base(); d.piano[3] = -5;
   assert.deepEqual(errori(C.calcola(d)), ['costo-4']);
   d = base(); d.rilevamenti[1].bcwp = 600000; d.rilevamenti[1].acwp = 700000;
   assert.deepEqual(errori(C.calcola(d)), ['ril-1-bcwp']);
-  d = base(); d.bac = ''; d.costiPeriodo[0] = ''; d.rilevamenti[0].acwp = '';
+  d = base(); d.bac = ''; d.piano[0] = ''; d.rilevamenti[0].acwp = '';
   assert.deepEqual(errori(C.calcola(d)).sort(), ['bac', 'costo-1', 'ril-0-acwp'].sort());
 });
 

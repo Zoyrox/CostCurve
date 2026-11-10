@@ -1,12 +1,21 @@
 {
   "formato": "costcurve",
-  "versione": 1,
+  "versione": 2,
   "titolo": "Nuovo gestionale di magazzino",
+  "nota": "Dati inventati.",
+  "report": {
+    "pm": "Mario Rossi",
+    "azienda": "Logistica Nord S.r.l.",
+    "data": "",
+    "commento": ""
+  },
   "unitaTempo": "mesi",
   "unitaMoneta": "migliaia",
+  "dataInizio": "2027-01-01",
   "durata": 12,
   "bac": 120,
-  "costiPeriodo": [
+  "modoPiano": "periodo",
+  "piano": [
     3,
     5,
     8,
@@ -20,18 +29,94 @@
     7,
     5
   ],
+  "modoAvanzamento": "periodi",
+  "numeroRilevamenti": 2,
   "rilevamenti": [
     {
       "periodo": 4,
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "periodo": 8,
+      "bcwp": null,
+      "acwp": null
+    }
+  ],
+  "avanzamento": [
+    {
+      "bcwp": 3.5,
+      "acwp": 3.2
+    },
+    {
+      "bcwp": 9,
+      "acwp": 8.3
+    },
+    {
+      "bcwp": 19,
+      "acwp": 17.5
+    },
+    {
       "bcwp": 31,
       "acwp": 28
     },
     {
-      "periodo": 8,
+      "bcwp": 46,
+      "acwp": 42
+    },
+    {
+      "bcwp": 62,
+      "acwp": 57
+    },
+    {
+      "bcwp": 79,
+      "acwp": 73
+    },
+    {
       "bcwp": 95,
       "acwp": 88
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
+    },
+    {
+      "bcwp": null,
+      "acwp": null
     }
   ],
-  "mostraPrevisione": true,
-  "nota": "Dati inventati."
+  "previsione": "auto",
+  "previsioneManuale": {
+    "eac": null,
+    "fine": null
+  },
+  "grafico": {
+    "proporzioni": 1.6,
+    "vista": {
+      "da": null,
+      "a": null,
+      "ymin": null,
+      "ymax": null
+    },
+    "mostra": {
+      "bcws": true,
+      "bcwp": true,
+      "acwp": true,
+      "frecce": true,
+      "etichette": true
+    }
+  },
+  "esporta": {
+    "pagina": "stessa",
+    "dimensione": "normale",
+    "vista": "intera"
+  }
 }
