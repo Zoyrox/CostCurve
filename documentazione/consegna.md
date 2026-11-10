@@ -1,6 +1,6 @@
 # Consegna: checklist, verifiche e domande del docente
 
-**Data di consegna consigliata: venerdì 13 novembre 2026, al laboratorio.**
+**Data di consegna: giovedì 12 novembre 2026.**
 - Si consegna esattamente quel giorno, né prima né dopo: la penale di ritardo è del 2% al giorno e
   quella di anticipo del 5% al giorno, ancora da chiarire.
 - Il lavoro è pronto dal 12: resta nel repository fino alla consegna.
@@ -18,7 +18,7 @@
 | **Output in formato .tex** | ✅ | pulsante "Scarica il file .tex"; esempi in `documentazione/esempio-tex/` |
 | **Documentazione della pianificazione** con risorse (consulenza, project management, esecuzione informatica) e **stima dei tempi per attività** | ✅ | `documentazione/pianificazione/pianificazione.pdf` (+ `.odt`) |
 | Tempi di consegna e penali | ✅ | sezione 8 della pianificazione |
-| Prodotto "non statico" (richiesta del docente in lezione) | ✅ | il sito ricalcola tutto e il `.tex` ha la sezione DATI separata, con i calcoli fatti in LaTeX |
+| Prodotto "non statico" (richiesta del docente) | ✅ | il sito ricalcola tutto e il `.tex` ha la sezione DATI separata, con i calcoli fatti in LaTeX |
 
 ### Priorità della richiesta
 

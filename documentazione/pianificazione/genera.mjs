@@ -29,7 +29,7 @@ const RISORSE = {
 // ---------------------------------------------------------------------
 const ATTIVITA = [
   { id: 'A1',  wbs: '1.1', nome: 'Avvio e analisi dei requisiti',
-    desc: 'Lettura della consegna, della lezione registrata e delle pagine 193-199 del libro; verifica delle formule CV, SV, %CV, %SV sull\'esempio numerico (mese 10: SV = -26.000, CV = -40.000).',
+    desc: 'Lettura della consegna e delle pagine 193-199 del libro; verifica delle formule CV, SV, %CV, %SV sull\'esempio numerico (mese 10: SV = -26.000, CV = -40.000).',
     ore: { PM: 0.5, CONS: 0.5 }, prec: [] },
   { id: 'A2',  wbs: '1.2', nome: 'Pianificazione (questo documento)',
     desc: 'WBS, stime bottom-up, Gantt, baseline, criteri di scelta, condizioni di realizzabilità, rischi. Consegnato a fine ora di laboratorio.',
@@ -85,7 +85,6 @@ const GIORNI = [
   { data: '2026-11-10', etichetta: 'mar 10' },
   { data: '2026-11-11', etichetta: 'mer 11' },
   { data: '2026-11-12', etichetta: 'gio 12' },
-  { data: '2026-11-13', etichetta: 'ven 13' },
 ];
 const ORE_MAX_GIORNO = 3;
 const PIANO = [
@@ -98,7 +97,7 @@ const PIANO = [
   [6, 'A11', 0.5], [6, 'A12', 1],
 ];
 // Riserva di gestione (management reserve), in ore di esecuzione informatica
-const RISERVA = { ore: 3, risorsa: 'ESE', giorni: [[6, 1.5], [7, 1.5]] };
+const RISERVA = { ore: 3, risorsa: 'ESE', giorni: [[2, 0.5], [3, 0.5], [5, 0.5], [6, 1.5]] };
 
 // ---------------------------------------------------------------------
 // 4. CALCOLI
@@ -366,18 +365,18 @@ const html = `<!doctype html>
     <h1>CostCurve — strumento per il diagramma costi-tempi</h1>
     <div class="sotto">Sito web che disegna le curve BCWS, BCWP e ACWP con due rilevamenti ed esporta il file LaTeX (.tex)</div>
   </div>
-  <div class="scheda">Autore: <b>____________</b><br>Classe: <b>______</b><br>Periodo: <b>6 – 13 novembre 2026</b><br>Versione 1.0 (baseline)</div>
+  <div class="scheda">Autore: <b>____________</b><br>Classe: <b>______</b><br>Periodo: <b>6 – 12 novembre 2026</b><br>Versione 1.0 (baseline)</div>
 </header>
 
 <div class="numeri">
   <div><span>Ore stimate</span><b>${fmtOre(oreTotali)}</b></div>
   <div><span>Baseline</span><b>${fmtEuro(baselineEuro)}</b></div>
   <div><span>Budget di base</span><b>${fmtEuro(budgetBase)}</b></div>
-  <div><span>Consegna prodotto</span><b>ven 13/11</b></div>
+  <div><span>Consegna prodotto</span><b>gio 12/11</b></div>
 </div>
 
 <h2><span class="n">1</span>Obiettivo, perimetro e deliverable</h2>
-<p><b>Obiettivo.</b> Costruire entro il 13 novembre un programma web che permetta a un project manager di inserire pochi dati (piano a budget e due rilevamenti) e di ottenere subito il diagramma costi-tempi con le curve BCWS, BCWP e ACWP, la tabella, la legenda dei parametri, il calcolo percentuale dell'andamento (%CV, %SV) e il file <b>.tex</b> pronto da compilare. Il progetto monitorato dal diagramma è generico: il prodotto è lo <i>strumento</i>.</p>
+<p><b>Obiettivo.</b> Costruire entro il 12 novembre un programma web che permetta a un project manager di inserire pochi dati (piano a budget e due rilevamenti) e di ottenere subito il diagramma costi-tempi con le curve BCWS, BCWP e ACWP, la tabella, la legenda dei parametri, il calcolo percentuale dell'andamento (%CV, %SV) e il file <b>.tex</b> pronto da compilare. Il progetto monitorato dal diagramma è generico: il prodotto è lo <i>strumento</i>.</p>
 <div class="due"><div>
 <p><b>Incluso</b></p><ul>
 <li>sito statico in italiano, utilizzabile da PC e telefono, anche senza connessione;</li>
@@ -394,7 +393,7 @@ const html = `<!doctype html>
 <li>D1 questo documento (fine laboratorio del 6/11);</li>
 <li>D2 sito pubblicato e codice nel repository;</li>
 <li>D3 file .tex di esempio e relativo PDF compilato;</li>
-<li>D4 guida d'uso e README (consegna 13/11).</li></ul>
+<li>D4 guida d'uso e README (consegna 12/11).</li></ul>
 </div></div>
 
 <h2><span class="n">2</span>WBS e attività</h2>
@@ -404,7 +403,7 @@ const html = `<!doctype html>
 
 <h2><span class="n">3</span>Calendario e cammino critico</h2>
 <figure>${gantt()}<figcaption>Figura 1 — Gantt in ore di lavoro: ogni giorno è diviso in ${ORE_MAX_GIORNO} ore (capacità massima dichiarata di una persona). Le attività arancioni sono sul cammino critico della rete logica.</figcaption></figure>
-<p><b>Cammino critico.</b> Sulla rete delle precedenze (metodo CPM, risorse illimitate) la durata minima è di ${fmtOre(durataLogica)} e il cammino critico è <b>${camminoTesto}</b> (∥ = attività in parallelo, entrambe critiche). Solo A6 (generatore .tex) ha scorrimento: ${fmtOre(perId.A6.slack)}, perché può procedere in parallelo all'anteprima SVG. Con <b>una sola persona</b> però le attività si eseguono una dopo l'altra: la durata reale è di ${fmtOre(oreTotali)} distribuite su 7 giorni, e un ritardo su qualunque attività sposta la consegna. Per questo la riserva è messa alla fine (giovedì e venerdì mattina).</p>
+<p><b>Cammino critico.</b> Sulla rete delle precedenze (metodo CPM, risorse illimitate) la durata minima è di ${fmtOre(durataLogica)} e il cammino critico è <b>${camminoTesto}</b> (∥ = attività in parallelo, entrambe critiche). Solo A6 (generatore .tex) ha scorrimento: ${fmtOre(perId.A6.slack)}, perché può procedere in parallelo all'anteprima SVG. Con <b>una sola persona</b> però le attività si eseguono una dopo l'altra: la durata reale è di ${fmtOre(oreTotali)} distribuite su 7 giorni, e un ritardo su qualunque attività sposta la consegna. Per questo la riserva è distribuita nei giorni più leggeri e soprattutto su giovedì, il giorno della consegna.</p>
 <p><b>Attività avviate prima della fine della pianificazione.</b> Sì, è possibile ed è voluto: il prototipo LaTeX (A3) parte venerdì mentre la pianificazione (A2) è ancora in corso (pianificazione "a onde successive"). Motivo: il rischio principale è LaTeX, e conviene scoprire subito se è un problema, perché cambierebbe le stime di A6. Il prezzo è un possibile rischio di rilavorazione, limitato perché il prototipo è usa e getta e dura solo mezz'ora prima della fine di A2.</p>
 
 <h2><span class="n">4</span>Baseline costi-tempi e budget di base</h2>
@@ -450,10 +449,10 @@ const html = `<!doctype html>
 <h2><span class="n">8</span>Piano di consegna e penali</h2>
 <ul>
 <li><b>Documentazione:</b> a fine ora del laboratorio di venerdì 6 novembre (milestone ◆ nel Gantt).</li>
-<li><b>Prodotto completo:</b> al laboratorio di <b>venerdì 13 novembre</b>, la data di scadenza indicata.</li>
-<li><b>Penale per ritardo:</b> 2% del punteggio per ogni giorno di ritardo. Per questo il prodotto è congelato giovedì 12 sera e la riserva copre giovedì e venerdì mattina.</li>
-<li><b>Penale per anticipo:</b> <span class="ipotesi">DA CHIARIRE</span> su Classroom compare una penale del 5% al giorno per la consegna in anticipo; prudenzialmente la consideriamo valida. Quindi si consegna <b>esattamente il 13 novembre</b>, né prima né dopo: il lavoro finito giovedì resta nel repository fino al laboratorio.</li>
-<li><b>Giorno di consegna consigliato:</b> venerdì 13 novembre, durante il laboratorio, con link al sito, file .tex di esempio, PDF e guida d'uso.</li>
+<li><b>Prodotto completo:</b> <b>giovedì 12 novembre</b>, la data di scadenza indicata.</li>
+<li><b>Penale per ritardo:</b> 2% del punteggio per ogni giorno di ritardo. Per questo il prodotto è congelato mercoledì 11 sera e la riserva copre soprattutto giovedì 12.</li>
+<li><b>Penale per anticipo:</b> <span class="ipotesi">DA CHIARIRE</span> su Classroom compare una penale del 5% al giorno per la consegna in anticipo; prudenzialmente la consideriamo valida. Quindi si consegna <b>esattamente il 12 novembre</b>, né prima né dopo: il lavoro finito prima resta nel repository fino alla consegna.</li>
+<li><b>Giorno di consegna:</b> giovedì 12 novembre, con link al sito, file .tex di esempio, PDF e guida d'uso.</li>
 </ul>
 
 <footer>Documento generato da <code>documentazione/pianificazione/genera.mjs</code>: ore, costi, cammino critico, Gantt e baseline sono calcolati dai dati delle attività, non scritti a mano. Le voci segnate IPOTESI sono assunzioni dichiarate.</footer>
