@@ -67,7 +67,7 @@
       const origine = p.modo === 'manuale' ? 'inserita dal project manager' : 'assunzione, dall\'ultimo rilevamento';
       return `<strong>Previsione</strong> <em>(${origine})</em>: costo finale EAC = ${fN(p.eac)} contro un budget di ${fN(m.bac)}; fine al ${ut.singolare} ${fN(p.durataPrevista, 1)} contro ${m.durata} pianificati.`;
     }
-    return p.modo !== 'no' && p.motivo ? esc(p.motivo) : '';
+    return p.modo !== 'no' && p.motivo && !p.nascostaDaUtente ? esc(p.motivo) : '';
   }
 
   /** Frasi di interpretazione e previsione. */
@@ -116,6 +116,8 @@
         ${d.nota ? `<p class="report-nota">${esc(d.nota)}</p>` : ''}
         <p class="report-meta">${meta.map(x => `<span>${x}</span>`).join('')}</p>
         ${rp.commento ? `<p class="report-commento"><strong>Commento del project manager.</strong> ${esc(rp.commento)}</p>` : ''}
+        <p class="report-sintesi"><strong>In sintesi.</strong> ${esc(m.riassunto)}</p>
+        ${m.note && m.note.length ? `<ol class="report-note-grafico">${m.note.map(nt => `<li><strong>${esc(m.unitaTempo.singolare)} ${esc(numeri.formatNumero(nt.periodo, 'auto'))}</strong>: ${esc(nt.testo)}</li>`).join('')}</ol>` : ''}
       </div>`;
   }
 
