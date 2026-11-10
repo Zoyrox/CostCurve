@@ -26,9 +26,14 @@
   .due figure:first-child { flex: 3; } .due figure:last-child { flex: 1.15; }
   .sotto { color: #444; }
   .salto { break-before: page; }
-  .gantt td.b { background: #0b5cad; } .gantt td.p { background: #9cc3ea; }
+  pre { break-inside: avoid; }
+  p:has(+ table) { break-after: avoid; }
+  table.rischi { break-inside: auto; font-size: 9pt; }
+  table.rischi tr { break-inside: avoid; }
+  .nota { border-left: 3px solid #b8bec6; padding: 2pt 0 2pt 9pt; color: #333; margin: 6pt 0 10pt; }
+  .gantt td.b { background: #0b5cad; } .gantt td.r { background: #b8bec6; } .gantt td.p { background: #9cc3ea; }
   .gantt td.c { width: 30pt; padding: 0; height: 13pt; border-left: 2px solid #fff; border-top: 4px solid #fff; border-bottom: 4px solid #fff; background-clip: padding-box; }
-  .gantt td.c:not(.b):not(.p) { background: #f1f3f5; }
+  .gantt td.c:not(.b):not(.p):not(.r) { background: #f1f3f5; }
   .gantt th.c { width: 30pt; padding: 2pt 0; text-align: center; font-size: 8.5pt; }
 </style>
 </head>
@@ -40,153 +45,131 @@
 <p><b>Nome del progetto: CostCurve</b></p>
 <p><b>Project manager e autore:</b> Matviy Kalistyy, classe 5C INF, materia GPOI – a.s. 2026/27</p>
 <p><b>Scopo del progetto</b></p>
-<p>Realizzare un <b>sito web</b> che permetta a un project manager di inserire i dati del proprio progetto
-e ottenere in automatico il <b>diagramma costi-tempi</b>, con le curve <b>BCWS</b>, <b>BCWP</b> e <b>ACWP</b>,
-gli scostamenti <b>CV</b> e <b>SV</b> (anche in percentuale) per uno o due monitoraggi, la tabella dei
-valori, un <b>report in PDF</b> e un <b>file LaTeX (.tex)</b> parametrico da consegnare.</p>
-<p>Il sito è stato realizzato da me, nel ruolo di project manager, usando un assistente di
-intelligenza artificiale (<b>Claude</b>) come “sviluppatore”. Io ho definito il problema, i
-requisiti, le scelte di progetto e le priorità; ho provato il prodotto e chiesto le correzioni. L'AI ha scritto il
-codice seguendo le mie indicazioni.</p>
+<p>Realizzare un <b>sito web</b> in cui un project manager inserisce i dati del proprio progetto e ottiene
+il <b>diagramma costi-tempi</b> (curve BCWS, BCWP e ACWP), gli scostamenti <b>CV</b> e <b>SV</b> anche in
+percentuale per uno o due monitoraggi, la tabella dei valori, un <b>report PDF</b> e un <b>file LaTeX
+(.tex)</b> parametrico.</p>
+<p>Ho lavorato da solo, nel ruolo di project manager, usando un assistente di intelligenza artificiale
+come sviluppatore. Io ho definito requisiti, priorità e scelte, e ho collaudato il prodotto. Il codice
+è stato scritto dall'AI. Lo dichiaro subito perché condiziona sia i rischi sia la valutazione critica
+(sezioni 12 e 14).</p>
 <p>Il sito è pubblicato su <b>GitHub Pages</b>: <b>zoyrox.github.io/CostCurve</b>.</p>
 
 <h2>2. Motivazioni e bisogni</h2>
-<p>Durante le lezioni di GPOI sul controllo di progetto (libro di testo, pagg. 198-199) abbiamo
-visto il diagramma costi-tempi. Disegnarlo a mano o in Excel richiede molto tempo, è facile
-sbagliare le curve cumulate e, se il grafico è piccolo, gli scostamenti non si vedono.</p>
-<p>Il bisogno che ho individuato è quello di uno strumento che:</p>
+<p>Il diagramma costi-tempi visto a lezione (libro di testo, pagg. 198-199) è facile da capire ma lento da
+costruire. A mano o in Excel bisogna cumulare i costi periodo per periodo, disegnare tre curve e misurare
+gli scostamenti. È facile sbagliare, e se il grafico è piccolo le differenze non si leggono.</p>
+<p>Lo strumento doveva quindi:</p>
 <ul>
-  <li>parta dai dati che il project manager ha davvero (piano dei costi, valori rilevati);</li>
-  <li>calcoli da solo CV, SV, %CV e %SV con le formule del libro;</li>
-  <li>disegni un grafico chiaro e <b>veritiero</b>, che si possa ingrandire senza falsarlo;</li>
-  <li>produca documenti pronti da consegnare (PDF e LaTeX);</li>
-  <li>funzioni gratis, senza installare niente, anche dal telefono;</li>
-  <li>sia spiegato in italiano semplice, anche per chi non conosce LaTeX.</li>
+  <li>partire dai dati che un project manager ha davvero (piano dei costi e valori rilevati);</li>
+  <li>applicare le formule del libro senza calcoli a mano;</li>
+  <li>mostrare un grafico ingrandibile senza deformare i dati;</li>
+  <li>produrre documenti da consegnare (PDF e .tex);</li>
+  <li>essere gratuito da usare e da pubblicare, anche da telefono.</li>
 </ul>
 
 <h2>3. Obiettivi del progetto</h2>
-<p>L'obiettivo principale è <b>realizzare e pubblicare un sito che produca il diagramma costi-tempi
-e il resoconto di un progetto a partire dai dati inseriti</b>. Gli obiettivi specifici sono:</p>
+<p>L'obiettivo principale è <b>pubblicare entro venerdì 13 novembre un sito che, dati il piano e i
+rilevamenti, produca il diagramma costi-tempi e il resoconto</b>. Gli obiettivi specifici sono:</p>
 <ol>
-  <li>studiare le formule e il grafico del libro e la spiegazione del professore;</li>
-  <li>scrivere il documento dei requisiti (brief) per l'AI;</li>
-  <li>pianificare il lavoro in 7 giorni con al massimo 2-3 ore al giorno;</li>
-  <li>realizzare il calcolo delle curve e degli indicatori;</li>
-  <li>realizzare il grafico, la tabella e le spiegazioni dei risultati;</li>
-  <li>generare il report PDF e il file .tex;</li>
+  <li>studiare formule e grafico del libro e la spiegazione registrata del professore;</li>
+  <li>scrivere un documento dei requisiti (brief) per l'AI;</li>
+  <li>restare entro 2-3 ore di lavoro al giorno;</li>
+  <li>spendere il meno possibile (obiettivo iniziale: 0 €);</li>
+  <li>realizzare calcoli, grafico, tabella, report PDF e file .tex;</li>
   <li>verificare che sito e .tex diano gli stessi numeri;</li>
-  <li>pubblicare il sito su GitHub Pages;</li>
-  <li>migliorare il prodotto con le prove su PC e telefono;</li>
-  <li>consegnare entro <b>venerdì 13 novembre</b>.</li>
+  <li>pubblicare e collaudare su PC e telefono.</li>
 </ol>
 
 <h2>4. Requisiti di alto livello</h2>
-<p>Il prodotto dovrà prevedere:</p>
 <ul>
-  <li>inserimento guidato dei dati in 4 passi (Progetto, Piano, Avanzamento, Risultati);</li>
-  <li>piano inseribile come costo per periodo o come totale progressivo;</li>
-  <li>uno o due rilevamenti (monitoraggi) con BCWP e ACWP;</li>
-  <li>calcolo di CV = BCWP − ACWP, SV = BCWP − BCWS, %CV e %SV;</li>
-  <li>grafico con le tre curve, frecce di CV e SV, legenda e previsione del costo finale (EAC);</li>
-  <li>zoom veritiero sul sito e, a scelta, anche nel PDF;</li>
-  <li>tabella dei valori e “semaforo” della situazione;</li>
-  <li>esportazione in PDF, LaTeX, immagine SVG, stampa e CSV per Excel;</li>
-  <li>stile minimale e professionale, con tema chiaro e scuro;</li>
-  <li>uso comodo da telefono;</li>
-  <li>dati salvati solo sul computer dell'utente (privacy);</li>
-  <li>pubblicazione gratuita online.</li>
+  <li>inserimento guidato dei dati (Progetto, Piano, Avanzamento, Risultati);</li>
+  <li>piano come costo per periodo o come totale progressivo;</li>
+  <li>uno o due rilevamenti con BCWP e ACWP;</li>
+  <li>CV = BCWP − ACWP, SV = BCWP − BCWS, %CV = CV / BCWS, %SV = SV / BCWS;</li>
+  <li>grafico con le tre curve, frecce di CV e SV, legenda e previsione del costo finale;</li>
+  <li>zoom veritiero, sul sito e (a scelta) nel PDF;</li>
+  <li>esportazione in PDF, LaTeX, SVG, stampa e CSV;</li>
+  <li>dati salvati solo sul dispositivo dell'utente;</li>
+  <li>pubblicazione gratuita.</li>
 </ul>
 
-<h2>5. Metodo di lavoro: io e l'intelligenza artificiale</h2>
-<p>Ho organizzato il lavoro come un piccolo progetto con un <b>committente</b> e un
-<b>fornitore</b>: io ho fatto il project manager e il cliente, l'AI ha fatto lo sviluppatore.
-Ho ripetuto ogni ciclo di lavoro con lo stesso schema:</p>
+<h2>5. Metodo di lavoro e scelta dello strumento AI</h2>
+<h3>Primo tentativo: AI gratuita (7-8 novembre)</h3>
+<p>Il piano iniziale prevedeva <b>costo zero</b>, quindi il 7 e l'8 novembre ho provato con un assistente
+AI gratuito. Il risultato non mi ha soddisfatto e ho deciso di cambiare strumento. In due sessioni ho perso
+circa 4 ore senza ottenere un risultato riutilizzabile.</p>
+<h3>Decisione: abbonamento a pagamento (9 novembre)</h3>
+<p>Il 9 novembre ho valutato due alternative:</p>
 <ol>
-  <li><b>Richiesta:</b> scrivo cosa voglio ottenere e i vincoli (tempo, stile, lingua).</li>
-  <li><b>Proposte:</b> chiedo all'AI di propormi più soluzioni o migliorie, senza applicarle.</li>
-  <li><b>Decisione:</b> scelgo io quali approvare, quali modificare e quali scartare.</li>
-  <li><b>Realizzazione:</b> l'AI scrive il codice e i test automatici.</li>
-  <li><b>Collaudo:</b> provo il sito su PC e telefono, con i dati del libro.</li>
-  <li><b>Correzioni:</b> segnalo ciò che non va e si ricomincia dal punto 1.</li>
+  <li>restare sull'AI gratuita e ridurre i requisiti;</li>
+  <li>spendere 25 € per un mese di abbonamento a <b>Claude</b> e mantenere i requisiti.</li>
 </ol>
-<p>Una regola che ho fissato fin dall'inizio: <b>nessuna modifica pubblicata online senza il mio OK
-esplicito</b>. Ogni versione è passata da una “pull request” su GitHub che ho controllato e approvato io.</p>
+<p>Con 4 giorni rimasti, ho scelto la seconda strada: 25 € erano accettabili, mentre perdere altri giorni
+avrebbe messo a rischio la consegna. È stata una <b>modifica del piano dei costi</b>: lo scostamento è
+spiegato nella sezione 13.</p>
+<h3>Ciclo di lavoro</h3>
+<ol>
+  <li><b>Richiesta:</b> descrivo cosa voglio ottenere e i vincoli.</li>
+  <li><b>Proposte:</b> chiedo più soluzioni, senza che vengano applicate.</li>
+  <li><b>Decisione:</b> scelgo quali approvare, modificare o scartare.</li>
+  <li><b>Realizzazione:</b> l'AI scrive il codice e le prove automatiche.</li>
+  <li><b>Collaudo:</b> provo il sito su PC e telefono con i dati del libro.</li>
+  <li><b>Correzioni:</b> segnalo i problemi e il ciclo riparte.</li>
+</ol>
+<p>Ho fissato una regola: nessuna modifica va online senza il mio OK. Ogni versione è passata da una
+pull request su GitHub che ho approvato io.</p>
 
-<h3>Le mie principali decisioni</h3>
+<h3>Decisioni principali</h3>
 <table class="larga">
-  <tr><th>Momento</th><th>Cosa ho deciso o segnalato</th><th>Effetto sul prodotto</th></tr>
-  <tr><td>Avvio</td><td>Brief completo: ruolo, obiettivo, formule del libro, grafico del professore, dati di prova, vincolo di 7 giorni a 2-3 ore al giorno</td><td>Base di tutto il progetto e del piano</td></tr>
-  <tr><td>Avvio</td><td>Tutto in italiano e spiegato in modo semplice</td><td>Testi, guida e messaggi di errore chiari</td></tr>
-  <tr><td>Avvio</td><td>Il .tex deve essere parametrico e compilabile da solo</td><td>Si cambiano i numeri in un'unica sezione DATI</td></tr>
-  <tr><td>Dopo la v1</td><td>“Io project manager devo poterlo compilare con i dati che ho”</td><td>Dati per periodo, 1 o 2 rilevamenti, previsione inserita a mano</td></tr>
-  <tr><td>Dopo la v1</td><td>Il grafico di esempio del libro doveva essere ricreabile</td><td>Esempio “grafico del libro” ricostruito fedelmente</td></tr>
-  <tr><td>Dopo la v1</td><td>Zoom per vedere meglio, ma “veritiero al 100%”</td><td>Assi ricalcolati, simbolo ≈ se l'asse non parte da zero</td></tr>
-  <tr><td>Dopo la v1</td><td>Zoom e pagina orizzontale nel PDF solo se li scelgo io</td><td>Finestra “Esporta” con le opzioni</td></tr>
-  <tr><td>Dopo la v1</td><td>Stile “minimale ma con colore, professionale e serio”</td><td>Restyling completo, palette leggibile anche per i daltonici</td></tr>
-  <tr><td>Dopo la v1</td><td>Pulsante chiaro/scuro con luna e sole</td><td>Tema scuro</td></tr>
-  <tr><td>Dopo la v2</td><td>Il grafico sul telefono “pecca” e anche su PC non è al massimo</td><td>Grafico ridisegnato a misura di schermo, schede Dati · Grafico · Risultati</td></tr>
-  <tr><td>Dopo la v2</td><td>Approvate 19 migliorie, tra cui modalità presentazione e app installabile</td><td>Versione 3</td></tr>
-  <tr><td>Pubblicazione</td><td>Trovato in prova reale un sito “rotto” dopo l'aggiornamento</td><td>Correzione della cache (versione 3.0.1)</td></tr>
+  <tr><th>Data</th><th>Decisione o segnalazione</th><th>Conseguenza</th></tr>
+  <tr><td>7-8 nov</td><td>Tentativo con AI gratuita, poi abbandonato</td><td>Circa 4 ore perse, piano dei costi rivisto</td></tr>
+  <tr><td>9 nov</td><td>Acquisto dell'abbonamento (25 €) e brief completo: formule, grafico del professore, dati di prova, vincolo di tempo</td><td>Prima versione completa in giornata</td></tr>
+  <tr><td>9 nov</td><td>Il .tex deve essere parametrico e compilabile da solo</td><td>I numeri si cambiano in un'unica sezione DATI</td></tr>
+  <tr><td>9 nov</td><td>Collaudo della v1: non si potevano inserire i dati reali di un project manager e il grafico del libro non era ricreabile</td><td>Versione 2: dati per periodo, 1-2 rilevamenti, previsione manuale</td></tr>
+  <tr><td>9 nov</td><td>Zoom solo se “veritiero al 100%”; stile più sobrio; tema chiaro/scuro</td><td>Assi ricalcolati, simbolo ≈, restyling</td></tr>
+  <tr><td>10 nov</td><td>Il grafico era poco leggibile sul telefono e non sfruttava lo schermo del PC</td><td>Versione 3: grafico a misura di schermo, schede da telefono</td></tr>
+  <tr><td>10 nov</td><td>Approvate tutte le 19 migliorie proposte</td><td>Più funzioni, ma anche più codice da verificare (vedi rischi)</td></tr>
+  <tr><td>10 nov</td><td>Dopo la pubblicazione il sito appariva “rotto” sul mio browser</td><td>Correzione della cache (v3.0.1)</td></tr>
 </table>
 
-<div class="salto"></div>
 <h2>6. Stakeholder</h2>
 <table class="larga">
   <tr><th>Stakeholder</th><th>Ruolo</th></tr>
-  <tr><td>Io</td><td>Project manager, ideatore, committente e collaudatore</td></tr>
-  <tr><td>Professore di GPOI</td><td>Cliente finale e valutatore della consegna</td></tr>
-  <tr><td>Compagni di classe</td><td>Utilizzatori del sito per i propri progetti</td></tr>
-  <tr><td>Claude (AI di Anthropic)</td><td>Sviluppatore: scrittura del codice, dei test e delle bozze di documentazione</td></tr>
-  <tr><td>GitHub</td><td>Archivio del codice, controllo delle versioni e hosting gratuito (Pages)</td></tr>
-  <tr><td>Overleaf</td><td>Compilazione online e gratuita del file .tex</td></tr>
+  <tr><td>Io</td><td>Project manager, committente e collaudatore</td></tr>
+  <tr><td>Professore di GPOI</td><td>Cliente finale e valutatore</td></tr>
+  <tr><td>Compagni di classe</td><td>Possibili utilizzatori</td></tr>
+  <tr><td>AI gratuita (scartata)</td><td>Primo fornitore valutato, non adeguato</td></tr>
+  <tr><td>Claude (Anthropic)</td><td>Fornitore a pagamento: codice, prove automatiche, bozze dei documenti</td></tr>
+  <tr><td>GitHub</td><td>Archivio del codice, versioni e hosting gratuito</td></tr>
+  <tr><td>Overleaf</td><td>Compilazione online del file .tex</td></tr>
 </table>
 
-<h2>7. Deliverable principali</h2>
-<p><b>Pianificazione</b></p>
+<h2>7. Deliverable</h2>
 <ul>
-  <li>documento dei requisiti (brief);</li>
-  <li>pianificazione con WBS, calendario, baseline costi-tempi e rischi (PDF e ODT);</li>
-  <li>documento di progettazione.</li>
-</ul>
-<p><b>Prodotto</b></p>
-<ul>
-  <li>sito CostCurve pubblicato su GitHub Pages;</li>
-  <li>report PDF generato dal sito;</li>
-  <li>file .tex parametrico, con esempi già compilati;</li>
-  <li>esempi pronti (grafico del libro, esempio numerico e altri casi).</li>
-</ul>
-<p><b>Chiusura</b></p>
-<ul>
-  <li>guida d'uso di una pagina;</li>
-  <li>checklist di consegna con le verifiche eseguite;</li>
-  <li>la presente relazione.</li>
+  <li><b>Pianificazione:</b> brief, pianificazione (WBS, calendario, baseline, rischi), progettazione.</li>
+  <li><b>Prodotto:</b> sito pubblicato, report PDF, file .tex parametrico con esempi compilati.</li>
+  <li><b>Chiusura:</b> guida d'uso, checklist di consegna, questa relazione.</li>
 </ul>
 
 <h2>8. WBS – Work Breakdown Structure</h2>
 <pre>1. COSTCURVE
 ├── 1.1 Avvio
-│   ├── 1.1.1 Studio di formule e grafico del libro (pagg. 198-199)
+│   ├── 1.1.1 Studio di formule e grafico (pagg. 198-199)
 │   ├── 1.1.2 Analisi della registrazione della lezione
-│   └── 1.1.3 Scrittura del brief per l'AI
+│   └── 1.1.3 Scelta dello strumento AI (tentativo gratuito, poi abbonamento)
 ├── 1.2 Pianificazione e progettazione
-│   ├── 1.2.1 WBS, calendario e rischi
-│   ├── 1.2.2 Progettazione delle schermate
-│   └── 1.2.3 Scelta della tecnologia (sito statico, gratis)
+│   ├── 1.2.1 Brief per l'AI
+│   ├── 1.2.2 WBS, calendario e rischi
+│   └── 1.2.3 Scelta della tecnologia (sito statico, hosting gratuito)
 ├── 1.3 Realizzazione v1
 │   ├── 1.3.1 Calcolo di curve e indicatori
 │   ├── 1.3.2 Generatore del file .tex
-│   ├── 1.3.3 Interfaccia a 4 passi e grafico
-│   └── 1.3.4 Report PDF
-├── 1.4 Miglioramento v2
-│   ├── 1.4.1 Dati del project manager e 1-2 rilevamenti
-│   ├── 1.4.2 Zoom veritiero
-│   └── 1.4.3 Restyling e tema chiaro/scuro
-├── 1.5 Miglioramento v3
-│   ├── 1.5.1 Grafico a misura di telefono e PC
-│   ├── 1.5.2 Cruscotto, sintesi e note
-│   └── 1.5.3 Import/export, presentazione e app installabile
+│   └── 1.3.3 Interfaccia, grafico e report PDF
+├── 1.4 Versione 2 (dati reali, zoom, stile)
+├── 1.5 Versione 3 (telefono, PC, funzioni aggiuntive)
 ├── 1.6 Test
-│   ├── 1.6.1 Test automatici dei calcoli
+│   ├── 1.6.1 Prove automatiche dei calcoli
 │   ├── 1.6.2 Confronto sito ↔ .tex
 │   └── 1.6.3 Prove su PC e telefono
 └── 1.7 Chiusura
@@ -195,41 +178,46 @@ esplicito</b>. Ogni versione è passata da una “pull request” su GitHub che 
     └── 1.7.3 Consegna</pre>
 
 <div class="salto"></div>
-<h2>9. Gantt</h2>
-<p>Finestra disponibile: da <b>venerdì 6</b> a <b>venerdì 13 novembre</b>, al massimo 2-3 ore al giorno.
-In blu le attività svolte, in azzurro quelle di chiusura.</p>
+<h2>9. Gantt (consuntivo)</h2>
+<p>Finestra disponibile: da venerdì 6 a venerdì 13 novembre, al massimo 2-3 ore al giorno. Legenda:</p>
+<ul>
+  <li><b>blu</b>: lavoro utile;</li>
+  <li><b>grigio</b>: tentativo con l'AI gratuita, abbandonato;</li>
+  <li><b>azzurro</b>: attività ancora da svolgere.</li>
+</ul>
 <table class="gantt">
   <tr><th>Attività</th><th class="c">ven 6</th><th class="c">sab 7</th><th class="c">dom 8</th><th class="c">lun 9</th><th class="c">mar 10</th><th class="c">mer 11</th><th class="c">gio 12</th><th class="c">ven 13</th></tr>
-  <tr><td>1.1 Avvio e brief</td><td class="c b"></td><td class="c b"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
-  <tr><td>1.2 Pianificazione e progettazione</td><td class="c"></td><td class="c b"></td><td class="c b"></td><td class="c b"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+  <tr><td>1.1 Studio di libro e lezione</td><td class="c b"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+  <tr><td>1.1.3 Tentativo con AI gratuita</td><td class="c"></td><td class="c r"></td><td class="c r"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+  <tr><td>1.2 Brief, piano e progettazione</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c b"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
   <tr><td>1.3 Realizzazione v1</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c b"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
-  <tr><td>1.4 Miglioramento v2</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c b"></td><td class="c b"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
-  <tr><td>1.5 Miglioramento v3</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c b"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+  <tr><td>1.4 Versione 2</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c b"></td><td class="c b"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+  <tr><td>1.5 Versione 3</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c b"></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
   <tr><td>1.6 Test</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c b"></td><td class="c b"></td><td class="c p"></td><td class="c p"></td><td class="c"></td></tr>
   <tr><td>1.7 Chiusura e consegna</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c b"></td><td class="c p"></td><td class="c p"></td><td class="c p"></td></tr>
 </table>
 
 <table class="num">
-  <tr><th>Fase</th><th>Ore stimate</th></tr>
-  <tr><td>Avvio e brief</td><td>3</td></tr>
-  <tr><td>Pianificazione e progettazione</td><td>3</td></tr>
-  <tr><td>Realizzazione v1 (guida e controllo dell'AI)</td><td>2</td></tr>
-  <tr><td>Miglioramento v2</td><td>2</td></tr>
-  <tr><td>Miglioramento v3</td><td>2</td></tr>
-  <tr><td>Test e prove su dispositivi</td><td>2,5</td></tr>
-  <tr><td>Chiusura, documentazione e consegna</td><td>2,5</td></tr>
-  <tr class="tot"><td>Totale</td><td>17 ore</td></tr>
+  <tr><th>Fase</th><th>Ore</th></tr>
+  <tr><td>Studio di libro e lezione</td><td>2</td></tr>
+  <tr><td>Tentativo con AI gratuita (lavoro perso)</td><td>4</td></tr>
+  <tr><td>Brief, piano e progettazione</td><td>2,5</td></tr>
+  <tr><td>Realizzazione v1, v2 e v3 (richieste, scelte, controllo)</td><td>6</td></tr>
+  <tr><td>Test e prove su dispositivi</td><td>3</td></tr>
+  <tr><td>Chiusura, documentazione e consegna</td><td>3</td></tr>
+  <tr class="tot"><td>Totale</td><td>20,5 ore</td></tr>
 </table>
-<p>Il totale rientra nel limite di 8 giorni × 2-3 ore. Il <b>cammino critico</b> è
-brief → realizzazione v1 → test → consegna: un ritardo nel brief avrebbe spostato tutto il resto.</p>
+<p class="nota">Il lavoro reale si è concentrato tra il 9 e il 10 novembre, oltre le 2-3 ore al giorno
+previste: è stato il prezzo dei due giorni persi. Sul totale della settimana il limite è rispettato
+(20,5 ore su un massimo di circa 24), ma la distribuzione no.</p>
 
 <h2>10. Iterazioni del prodotto</h2>
 <table class="larga">
-  <tr><th>Versione</th><th>Contenuto</th><th>Nata da</th></tr>
-  <tr><td><b>v1</b></td><td>Calcolo delle curve, grafico, tabella, report PDF, file .tex, pubblicazione</td><td>Il brief iniziale</td></tr>
-  <tr><td><b>v2</b></td><td>Dati per periodo, 1-2 rilevamenti, previsione manuale, zoom veritiero, export a scelta, nuovo stile, tema scuro</td><td>Il mio collaudo della v1</td></tr>
-  <tr><td><b>v3</b></td><td>Grafico a misura di schermo, schede da telefono, gesti, cruscotto, sintesi, note, link, Excel/CSV, presentazione, annulla, app installabile</td><td>Le prove su telefono e PC e le 19 proposte che ho approvato</td></tr>
-  <tr><td><b>v3.0.1</b></td><td>Correzione: il browser non usa più file vecchi dopo un aggiornamento</td><td>Un problema trovato da me sul sito pubblicato</td></tr>
+  <tr><th>Versione</th><th>Contenuto</th><th>Motivo</th></tr>
+  <tr><td><b>v1</b></td><td>Calcolo delle curve, grafico, tabella, report PDF, .tex, pubblicazione</td><td>Brief iniziale</td></tr>
+  <tr><td><b>v2</b></td><td>Dati per periodo, 1-2 rilevamenti, previsione manuale, zoom veritiero, nuovo stile, tema scuro</td><td>La v1 non rispondeva al bisogno reale: brief incompleto</td></tr>
+  <tr><td><b>v3</b></td><td>Grafico a misura di schermo, schede da telefono, gesti, cruscotto, sintesi, note, link, Excel/CSV, presentazione, app installabile</td><td>Leggibilità scarsa su telefono e PC</td></tr>
+  <tr><td><b>v3.0.1</b></td><td>Il browser non usa più file vecchi dopo un aggiornamento</td><td>Errore visibile solo sul sito pubblicato</td></tr>
 </table>
 
 <div class="due">
@@ -238,86 +226,110 @@ brief → realizzazione v1 → test → consegna: un ritardo nel brief avrebbe s
 </div>
 
 <h2>11. Test e controllo qualità</h2>
-<p>Non mi sono fidato del codice “a scatola chiusa”: ho chiesto che ogni versione fosse verificata con
-prove ripetibili, e ho controllato i numeri con l'esempio numerico del libro.</p>
 <table class="larga">
   <tr><th>Verifica</th><th>Risultato</th></tr>
-  <tr><td>Test automatici dei calcoli (formule, arrotondamenti, importazione)</td><td>28 su 28 superati</td></tr>
-  <tr><td>Confronto numeri del sito e del file .tex compilato</td><td>7 casi, 0 differenze, 0 avvisi LaTeX</td></tr>
-  <tr><td>Prova completa nel browser (inserimento, grafico, export, link…)</td><td>38 controlli su 38 superati</td></tr>
-  <tr><td>Telefono (verticale e orizzontale) e app senza rete</td><td>Funzionante</td></tr>
-  <tr><td>Report PDF</td><td>Grafico vettoriale, nitido a qualsiasi zoom</td></tr>
+  <tr><td>Prove automatiche dei calcoli</td><td>28 su 28 superate</td></tr>
+  <tr><td>Numeri del sito confrontati con il .tex compilato</td><td>7 casi, 0 differenze</td></tr>
+  <tr><td>Prova completa nel browser</td><td>38 controlli su 38</td></tr>
+  <tr><td>Esempio numerico del libro (pag. 199)</td><td>Valori coincidenti con quelli del libro</td></tr>
+  <tr><td>Telefono reale, Safari, Firefox</td><td><b>Non verificato</b> (solo telefono simulato e Chrome)</td></tr>
 </table>
-<p><b>Problemi trovati e risolti durante il collaudo:</b></p>
+<p class="nota">Le prove automatiche le ha scritte la stessa AI che ha scritto il codice: un errore di
+interpretazione delle formule potrebbe trovarsi in entrambi. Per questo il confronto con i valori
+dell'esempio del libro è la verifica più importante, non i numeri “28/28” e “38/38”.</p>
+<p><b>Difetti trovati in collaudo:</b></p>
 <ul>
-  <li>il grafico di esempio del libro non era ricreabile con i dati della v1;</li>
-  <li>sul telefono il grafico finiva sotto, fuori dallo schermo, e le etichette si sovrapponevano;</li>
+  <li>il grafico di esempio del libro non era ricreabile nella v1;</li>
+  <li>sul telefono il grafico finiva fuori dallo schermo e le etichette si sovrapponevano;</li>
   <li>le voci del menu “⋯” non rispondevano ai clic;</li>
-  <li>dopo la pubblicazione della v3 il browser mescolava file nuovi e vecchi.</li>
+  <li><b>un difetto è arrivato online:</b> dopo la pubblicazione della v3 il browser mescolava file nuovi e
+    vecchi. Mancava una prova sul sito pubblicato prima di considerare chiusa la versione.</li>
 </ul>
 
 <div class="salto"></div>
 <h2>12. Analisi dei rischi</h2>
-<p>Seguendo l'impostazione utilizzata nel libro:</p>
-<table class="larga">
-  <tr><th>Rischio</th><th>Probabilità</th><th>Impatto</th><th>Valutazione</th><th>Come l'ho gestito</th></tr>
-  <tr><td>Tempo insufficiente (2-3 ore al giorno)</td><td>Alta</td><td>Alto</td><td>Alto</td><td>Brief dettagliato fin dall'inizio, priorità chiare</td></tr>
-  <tr><td>Calcoli sbagliati prodotti dall'AI</td><td>Media</td><td>Alto</td><td>Alto</td><td>Test automatici e confronto con l'esempio del libro</td></tr>
-  <tr><td>Grafico diverso da quello del professore</td><td>Media</td><td>Alto</td><td>Alto</td><td>Esempio “grafico del libro” ricostruito e verificato</td></tr>
-  <tr><td>File .tex che non compila</td><td>Media</td><td>Medio</td><td>Medio</td><td>Compilazione automatica di tutti i casi di prova</td></tr>
-  <tr><td>Sito non leggibile sul telefono</td><td>Media</td><td>Medio</td><td>Medio</td><td>Prove su telefono e versione 3</td></tr>
-  <tr><td>Modifiche pubblicate senza controllo</td><td>Bassa</td><td>Alto</td><td>Medio</td><td>Regola “niente online senza il mio OK” e pull request</td></tr>
-  <tr><td>Costi oltre il previsto</td><td>Bassa</td><td>Basso</td><td>Basso</td><td>Solo strumenti gratuiti e un abbonamento a prezzo fisso</td></tr>
+<p>Seguendo l'impostazione del libro: probabilità e impatto, poi la valutazione.
+La colonna “Esito” indica se il rischio si è verificato davvero.</p>
+<table class="larga rischi">
+  <tr><th>Rischio</th><th>Prob.</th><th>Impatto</th><th>Valut.</th><th>Prevenzione / risposta</th><th>Esito</th></tr>
+  <tr><td>Strumento gratuito non adeguato</td><td>Alta</td><td>Alto</td><td>Alto</td><td>Alternativa a pagamento con un tetto di spesa (1 mese)</td><td><b>Verificato</b>: 4 ore perse, +25 €</td></tr>
+  <tr><td>Calcoli sbagliati dall'AI, non riconosciuti da me</td><td>Media</td><td>Alto</td><td>Alto</td><td>Formule del libro nel brief, confronto con l'esempio numerico del libro, sito ↔ .tex</td><td>Non verificato finora</td></tr>
+  <tr><td>Requisiti incompleti o capiti male</td><td>Alta</td><td>Medio</td><td>Alto</td><td>Collaudo subito dopo la v1, iterazioni brevi</td><td><b>Verificato</b>: v1 da rifare in parte</td></tr>
+  <tr><td>Tempo insufficiente dopo il ritardo iniziale</td><td>Media</td><td>Alto</td><td>Alto</td><td>Concentrare il lavoro il 9-10 novembre, tenere 11-13 come margine</td><td>Assorbito, con giorni più lunghi</td></tr>
+  <tr><td>Aggiunta continua di funzioni (scope creep)</td><td>Media</td><td>Medio</td><td>Medio</td><td>Proposte solo dopo il collaudo, approvazione esplicita</td><td>Parzialmente verificato: 19 migliorie in un colpo</td></tr>
+  <tr><td>Difetti visibili solo online</td><td>Media</td><td>Medio</td><td>Medio</td><td>Prova del sito pubblicato dopo ogni rilascio</td><td><b>Verificato</b>: cache, corretto in v3.0.1</td></tr>
+  <tr><td>Codice che non so modificare da solo</td><td>Alta</td><td>Medio</td><td>Alto</td><td>Codice commentato in italiano, guida d'uso, .tex modificabile solo nella sezione DATI</td><td>Rischio ancora aperto</td></tr>
+  <tr><td>Fine dell'abbonamento prima della consegna</td><td>Bassa</td><td>Medio</td><td>Basso</td><td>Tutto il codice su GitHub, il sito non dipende dall'AI per funzionare</td><td>Non verificato</td></tr>
+  <tr><td>Problemi su browser o telefoni non provati</td><td>Media</td><td>Basso</td><td>Medio</td><td>Tecnologie web standard, nessuna libreria esterna online</td><td>Aperto: Safari e Firefox non provati</td></tr>
 </table>
-<p><b>Il rischio più importante</b> era affidarsi all'AI senza controllare. Per questo ho dedicato
-tempo al collaudo e ho chiesto che ogni numero mostrato dal sito fosse confrontato con il file .tex
-e con le formule del libro.</p>
+<p><b>Rischi più importanti.</b></p>
+<ul>
+  <li><b>Calcoli sbagliati non riconosciuti.</b> È l'unico rischio che renderebbe inutile il prodotto, e il
+    controllo dipende dalle mie conoscenze delle formule.</li>
+  <li><b>Codice che non so modificare da solo.</b> È il rischio che resta aperto dopo la consegna: oggi non
+    saprei correggere da solo un errore complesso nel codice del grafico.</li>
+</ul>
 
 <h2>13. Budget di progetto</h2>
-<p><b>Preventivo</b></p>
+<p><b>Preventivo iniziale</b> (6 novembre, con AI gratuita)</p>
 <table class="num">
   <tr><th>Voce</th><th>Best case</th><th>Most likely</th><th>Worst case</th></tr>
-  <tr><td>Abbonamento Claude AI</td><td>€ 0</td><td>€ 25</td><td>€ 50</td></tr>
-  <tr><td>Hosting e dominio (GitHub Pages)</td><td>€ 0</td><td>€ 0</td><td>€ 12</td></tr>
+  <tr><td>Strumento AI</td><td>€ 0</td><td>€ 0</td><td>€ 25</td></tr>
+  <tr><td>Hosting (GitHub Pages)</td><td>€ 0</td><td>€ 0</td><td>€ 0</td></tr>
+  <tr><td>Dominio personalizzato</td><td>€ 0</td><td>€ 0</td><td>€ 12</td></tr>
   <tr><td>Software (editor, LaTeX, Overleaf)</td><td>€ 0</td><td>€ 0</td><td>€ 0</td></tr>
   <tr><td>Hardware (PC e telefono già posseduti)</td><td>€ 0</td><td>€ 0</td><td>€ 0</td></tr>
-  <tr class="tot"><td>Totale</td><td>€ 0</td><td>€ 25</td><td>€ 62</td></tr>
+  <tr class="tot"><td>Totale</td><td>€ 0</td><td>€ 0</td><td>€ 37</td></tr>
 </table>
-<p class="sotto">Il caso peggiore prevedeva un secondo mese di abbonamento e un dominio personalizzato.</p>
 
 <p><b>Consuntivo</b></p>
 <table class="num">
-  <tr><th>Voce</th><th>Speso</th></tr>
-  <tr><td>Abbonamento mensile Claude AI</td><td>€ 25</td></tr>
-  <tr><td>GitHub, GitHub Pages, Overleaf, LaTeX</td><td>€ 0</td></tr>
-  <tr class="tot"><td>Totale effettivo</td><td>€ 25</td></tr>
+  <tr><th>Voce</th><th>Previsto</th><th>Speso</th><th>Scostamento</th></tr>
+  <tr><td>Abbonamento mensile Claude (acquistato il 9 nov)</td><td>€ 0</td><td>€ 25</td><td>+ € 25</td></tr>
+  <tr><td>Hosting, software, hardware</td><td>€ 0</td><td>€ 0</td><td>€ 0</td></tr>
+  <tr class="tot"><td>Totale</td><td>€ 0</td><td>€ 25</td><td>+ € 25</td></tr>
 </table>
-<p>Il progetto è stato chiuso <b>in linea con il budget</b> (most likely) e <b>nei tempi</b>.
-Le circa 17 ore di lavoro sono mie e non sono state pagate. Come confronto: far sviluppare
-da zero un sito con queste funzioni da un web developer professionista costerebbe, a mia
-stima indicativa, alcune migliaia di euro.</p>
+<p>Rispetto al caso <i>most likely</i> il progetto è <b>andato oltre il budget di 25 €</b>, restando
+comunque entro il <i>worst case</i>. La causa è il rischio “strumento gratuito non adeguato”, che si è
+verificato. Le ore di lavoro non sono state pagate e non compaiono nel budget, ma il tentativo fallito ne ha fatte perdere
+circa 4.</p>
 
-<h2>14. Cosa ho imparato</h2>
+<h2>14. Valutazione critica</h2>
+<p><b>Cosa ha funzionato</b></p>
 <ul>
-  <li><b>Il project manager decide, l'AI esegue:</b> la qualità del risultato dipende da quanto
-    sono chiari i requisiti e da quanto si controlla il lavoro.</li>
-  <li><b>Chiedere proposte prima di agire</b> mi ha permesso di scegliere io le migliorie, invece di
-    accettare tutto.</li>
-  <li><b>Il collaudo reale conta:</b> alcuni problemi (telefono, cache del browser) sono emersi solo
-    usando il sito come un utente vero.</li>
-  <li>Ho applicato in pratica WBS, Gantt, analisi dei rischi e budget, cioè gli stessi strumenti
-    studiati nel corso.</li>
+  <li>Avere una regola chiara di approvazione: niente è stato pubblicato senza il mio OK.</li>
+  <li>Chiedere proposte prima delle modifiche, così ho potuto scegliere invece di accettare tutto.</li>
+  <li>Il confronto automatico tra sito e .tex, che ha trovato errori di arrotondamento prima della
+    consegna.</li>
+</ul>
+<p><b>Cosa non ha funzionato</b></p>
+<ul>
+  <li><b>Due giorni persi</b> con lo strumento gratuito. Avrei dovuto stabilire prima un criterio per
+    abbandonarlo, per esempio “se dopo 2 ore non funziona, cambio”.</li>
+  <li><b>Brief iniziale incompleto.</b> Non avevo scritto che il project manager deve inserire i propri
+    dati periodo per periodo: la v1 è stata da rifare in parte.</li>
+  <li><b>Troppe funzioni insieme</b> nella v3. Utili, ma 19 cambiamenti insieme rendono più difficile
+    controllare tutto.</li>
+  <li><b>Nessuna prova sul sito pubblicato</b> prima di chiudere la v3: l'errore della cache l'ho visto io
+    da utente, non durante il collaudo.</li>
+</ul>
+<p><b>Limiti del prodotto</b></p>
+<ul>
+  <li>Non è stato provato su un telefono reale, né su Safari e Firefox.</li>
+  <li>I dati restano nel browser: se si cancella la cronologia senza aver salvato il file, si perdono.</li>
+  <li>La previsione del costo finale (EAC = BAC / CPI) è un'ipotesi semplice, valida solo se l'andamento
+    resta uguale.</li>
+  <li>Il codice è stato scritto dall'AI: lo capisco nelle linee generali, non in ogni dettaglio.</li>
 </ul>
 
 <h2>15. Conclusioni</h2>
-<p>Il progetto <b>CostCurve</b> ha portato alla realizzazione di un sito funzionante e pubblicato che
-trasforma i dati di un progetto nel diagramma costi-tempi, con indicatori, report PDF e file LaTeX.</p>
-<p>Il lavoro è stato svolto da una persona con il supporto dell'intelligenza artificiale, in circa
-17 ore distribuite su una settimana e con una spesa di <b>25 €</b>. Il mio ruolo è stato quello del
-project manager: definire cosa costruire, pianificare, decidere tra le proposte, collaudare e
-approvare ogni versione.</p>
-<p>La pianificazione attraverso <b>WBS, Gantt, analisi dei rischi e budget</b> ha permesso di tenere
-sotto controllo tempi e costi e di arrivare alla consegna con un prodotto verificato.</p>
+<p>Il sito è pubblicato e funziona: dai dati di un progetto produce il diagramma costi-tempi, gli
+indicatori, il report PDF e il file LaTeX.</p>
+<p>Rispetto al piano iniziale ci sono stati tre scostamenti: <b>+25 € di costi</b>, <b>circa 4 ore
+perse</b> e un <b>difetto arrivato online</b>, corretto in giornata. La scadenza è rispettata.</p>
+<p>L'esperienza mi ha mostrato in pratica cosa significa controllare un progetto: un rischio messo in
+tabella (lo strumento gratuito) si è verificato davvero, ha spostato costi e tempi, e averlo previsto ha
+reso più veloce la decisione su come rispondere.</p>
 
 </body>
 </html>
