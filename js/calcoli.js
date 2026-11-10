@@ -73,8 +73,9 @@
       grafico: {
         proporzioni: 1.6,
         vista: { da: null, a: null, ymin: null, ymax: null },
-        mostra: { bcws: true, bcwp: true, acwp: true, frecce: true, etichette: true },
+        mostra: { bcws: true, bcwp: true, acwp: true, previsione: true, frecce: true, etichette: true },
       },
+      note: [],
       esporta: { pagina: 'stessa', dimensione: 'normale', vista: 'intera' },
     };
   }
@@ -120,7 +121,7 @@
     d.grafico = {
       proporzioni: Number.isFinite(prop) && prop >= 0.5 && prop <= 3 ? prop : 1.6,
       vista: { da: num(vista.da), a: num(vista.a), ymin: num(vista.ymin), ymax: num(vista.ymax) },
-      mostra: Object.assign({ bcws: true, bcwp: true, acwp: true, frecce: true, etichette: true }, gr.mostra || {}),
+      mostra: Object.assign({ bcws: true, bcwp: true, acwp: true, previsione: true, frecce: true, etichette: true }, gr.mostra || {}),
     };
     for (const k of Object.keys(d.grafico.mostra)) d.grafico.mostra[k] = d.grafico.mostra[k] !== false;
     const es = g.esporta || {};
@@ -129,6 +130,7 @@
       dimensione: ['normale', 'grande', 'massima'].includes(es.dimensione) ? es.dimensione : 'normale',
       vista: es.vista === 'attuale' ? 'attuale' : 'intera',
     };
+    d.note = (Array.isArray(g.note) ? g.note : []).map(n => ({ periodo: num(n && n.periodo), testo: testo(n && n.testo).replace(/\s+/g, ' ').trim() }));
     delete d.costiPeriodo; delete d.mostraPrevisione;
     d.versione = 2;
     return d;
@@ -298,6 +300,33 @@
     if (segno(r.cv) >= 0 && segno(r.sv) >= 0) return { colore: 'verde', icona: '✓', parola: 'In linea' };
     const critico = (r.pcv !== null && r.pcv < SOGLIA_CRITICA) || (r.psv !== null && r.psv < SOGLIA_CRITICA);
     return critico ? { colore: 'rosso', icona: '✕', parola: 'Critico' } : { colore: 'giallo', icona: '!', parola: 'Attenzione' };
+  }
+
+  /**
+   * Riassunto in una frase, da copiare in una mail o nel report.
+   * Es.: "Al mese 16 il progetto è in ritardo del 17,1% e costa il 22,6% in più
+   * del valore del lavoro svolto. A questo ritmo costerà circa 687.273 € (budget
+   * 540.000 €) e finirà al mese 27,7 invece che al 23."
+   */
+  function riassunto(m) {
+    const r = m.rilevamenti[m.rilevamenti.length - 1];
+    const ut = m.unitaTempo, um = m.unitaMoneta.breve;
+    const pc = v => numeri.formatNumero(Math.abs(v), 1) + '%';
+    const tempi = segno(r.sv) < 0 ? (r.psv !== null ? `è in ritardo del ${pc(r.psv)}` : 'è in ritardo')
+      : segno(r.sv) > 0 ? (r.psv !== null ? `è in anticipo del ${pc(r.psv)}` : 'è in anticipo') : 'è nei tempi';
+    const costi = segno(r.cv) < 0 ? (r.pcv !== null ? `costa il ${pc(r.pcv)} in più del valore del lavoro svolto` : 'costa più del valore del lavoro svolto')
+      : segno(r.cv) > 0 ? (r.pcv !== null ? `costa il ${pc(r.pcv)} in meno del valore del lavoro svolto` : 'costa meno del valore del lavoro svolto') : 'costa quanto previsto';
+    let s = `Al ${ut.singolare} ${r.t}${r.data ? ` (${r.data})` : ''} il progetto ${tempi} e ${costi}.`;
+    const p = m.previsione;
+    if (p.eac !== null && p.durataPrevista !== null && (p.visibile || p.nascostaDaUtente)) {
+      const come = p.modo === 'manuale' ? 'Secondo la previsione del project manager' : 'A questo ritmo';
+      s += ` ${come} costerà circa ${f(p.eac)} ${um} (budget ${f(m.bac)} ${um}) e finirà al ${ut.singolare} ${numeri.formatNumero(p.durataPrevista, 1)} invece che al ${m.durata}.`;
+    }
+    if (m.tendenza && m.tendenza.psv !== null && m.tendenza.pcv !== null) {
+      const meglio = (m.tendenza.psv > 0.05 ? 1 : m.tendenza.psv < -0.05 ? -1 : 0) + (m.tendenza.pcv > 0.05 ? 1 : m.tendenza.pcv < -0.05 ? -1 : 0);
+      s += meglio > 0 ? ' Rispetto al rilevamento precedente la situazione migliora.' : meglio < 0 ? ' Rispetto al rilevamento precedente la situazione peggiora.' : ' Rispetto al rilevamento precedente la situazione è stabile.';
+    }
+    return s;
   }
 
   // ---- Calcolo del modello --------------------------------------------
@@ -494,6 +523,7 @@
       if (prev.durataPrevista <= ultimoACWP[0] + EPS) prev.motivo = `La fine stimata (${numeri.formatNumero(prev.durataPrevista, 1)}) cade prima dell'ultimo costo rilevato: la curva di previsione non si disegna.`;
       else if (prev.eac < ultimoACWP[1] - EPS) prev.motivo = `Il costo finale stimato (${f(prev.eac)}) è minore di quanto già speso (${f(ultimoACWP[1])}): la curva di previsione non si disegna.`;
       else if (d.previsione === 'auto' && prev.durataPrevista > 3 * n) prev.motivo = `La fine stimata (${numeri.formatNumero(prev.durataPrevista, 1)} ${ut.plurale}) supera il triplo della durata pianificata: la curva di previsione non si disegna.`;
+      else if (d.grafico.mostra.previsione === false) prev.nascostaDaUtente = true;
       else prev.visibile = true;
     }
     if (prev.visibile) {
@@ -506,6 +536,27 @@
       modello.curve.previsione = { x0: tU, y0: aU, c1x: tU + h / 3, c1y: aU + m * h / 3, c2x: prev.durataPrevista - h / 3, c2y: prev.eac, x1: prev.durataPrevista, y1: prev.eac };
     }
     modello.previsione = prev;
+
+    // Note sul grafico (facoltative): una nota per periodo, in ordine di tempo
+    modello.note = [];
+    d.note.forEach((nt, i) => {
+      if (!nt.testo && nt.periodo === null) return;
+      if (!nt.testo) { avviso('nota-' + i, `La nota ${i + 1} non ha testo: non viene mostrata.`); return; }
+      if (nt.periodo === null || !Number.isFinite(nt.periodo) || nt.periodo < 0 || nt.periodo > n) {
+        avviso('nota-' + i, `La nota "${nt.testo.slice(0, 30)}" deve avere un ${ut.singolare} tra 0 e ${n}: non viene mostrata.`); return;
+      }
+      modello.note.push({ periodo: nt.periodo, testo: nt.testo });
+    });
+    modello.note.sort((a, b) => a.periodo - b.periodo);
+    modello.note.forEach((nt, i) => { nt.n = i + 1; });
+
+    // Tendenza dal rilevamento 1 al 2 (punti percentuali): positivo = migliora
+    if (modello.rilevamenti.length === 2) {
+      const [a1, a2] = modello.rilevamenti;
+      const delta = (x, y) => (x === null || y === null ? null : y - x);
+      modello.tendenza = { psv: delta(a1.psv, a2.psv), pcv: delta(a1.pcv, a2.pcv) };
+    } else modello.tendenza = null;
+    modello.riassunto = riassunto(modello);
 
     // ---- Assi e vista (zoom). Stesso algoritmo del .tex ---------------
     const mostra = d.grafico.mostra;
