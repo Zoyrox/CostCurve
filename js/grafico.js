@@ -261,7 +261,7 @@
 
     // margini e tacche calcolati sullo spazio disponibile
     const T = 24;
-    const sotto = 24 + (prev ? 18 : 0) + 4;
+    const sotto = 24 + (prev ? 30 : 0) + 4;
     const PH = H - T - sotto;
     const nY = Math.max(3, Math.min(9, Math.round(PH / 58)));
     const ystep = passoBello((ymax - ymin) / nY);
@@ -345,9 +345,12 @@
       dentro += linea(x, T + PH, x, T + 14, C.testo, 1, '4 3', ev ? 0.5 : 1);
       const titolo = compatto ? `Ril. ${r.n}` : `Rilevamento ${r.n} · ${ut.singolare} ${r.t}`;
       const wt = larg(titolo, fs - 0.5, true) + 12;
-      dentro += `<rect x="${r2(x - wt / 2)}" y="${T - 2}" width="${r2(wt)}" height="17" rx="8.5" fill="${C.fondo}" stroke="${C.griglia}"/>`;
-      dentro += testo(x, T + 10, titolo, { anchor: 'middle', bold: true, size: fs - 0.5 });
-      occupati.push({ x: x - wt / 2, y: T - 2, w: wt, h: 17 });
+      // se tocca l'etichetta del rilevamento precedente, scende di una riga
+      let yp = T - 2;
+      if (occupati.some(o => o.pill && x - wt / 2 < o.x + o.w + 4 && x + wt / 2 + 4 > o.x && o.y === yp)) yp = T + 18;
+      dentro += `<rect x="${r2(x - wt / 2)}" y="${yp}" width="${r2(wt)}" height="17" rx="8.5" fill="${C.fondo}" stroke="${C.griglia}"/>`;
+      dentro += testo(x, yp + 12, titolo, { anchor: 'middle', bold: true, size: fs - 0.5 });
+      occupati.push({ x: x - wt / 2, y: yp, w: wt, h: 17, pill: true });
       const xSV = x + 13;
       const etSV = compatto ? `SV${r.n}` : `SV${r.n} ${numeri.formatBreve(r.sv, true)}`;
       const etCV = compatto ? `CV${r.n}` : `CV${r.n} ${numeri.formatBreve(r.cv, true)}`;
@@ -387,16 +390,24 @@
       dentro += `<rect x="${r2(xe - 4.5)}" y="${r2(ye - 4.5)}" width="9" height="9" rx="2" fill="${C.acwp}" stroke="${C.fondo}" stroke-width="1.5" opacity="${op}"/>`;
       if (mostra.etichette) {
         const t = `EAC ${numeri.formatBreve(p.eac)}`;
-        const destra = xe + larg(t, fs - 0.5, true) + 14 < L + PW + R;
-        dentro += testo(destra ? xe + 9 : xe - 9, ye + (destra ? 4 : -9), t, { anchor: destra ? 'start' : 'end', bold: true, size: fs - 0.5, op });
+        const wE = larg(t, fs - 0.5, true);
+        const destra = xe + wE + 14 < L + PW + R;
+        const xb = destra ? xe + 9 : xe - 9 - wE;
+        const yb = libero(xb, ye + (destra ? -8 : -21), wE, 16);   // non si sovrappone a etichette e cartellini
+        dentro += testo(destra ? xe + 9 : xe - 9, yb + 12, t, { anchor: destra ? 'start' : 'end', bold: true, size: fs - 0.5, op });
       }
+      // le due scritte non escono dal riquadro e, se si toccano, la seconda va una riga sotto
+      const scritte = [];
       const fine = (xm, colore, t, anc) => {
-        // la scritta non deve uscire dal riquadro
         const w = larg(t, fs - 1, true);
         if (anc === 'middle' && xm + w / 2 > W - 2) anc = 'end';
         if (anc === 'middle' && xm - w / 2 < 2) anc = 'start';
         if (anc === 'start' && xm + 4 + w > W - 2) anc = 'end';
-        return linea(xm, T + PH, xm, T + PH + 22, colore, 1.6) + testo(xm + (anc === 'end' ? -4 : anc === 'start' ? 4 : 0), T + PH + 36, t, { anchor: anc, bold: true, size: fs - 1, colore });
+        const x0 = anc === 'end' ? xm - 4 - w : anc === 'start' ? xm + 4 : xm - w / 2;
+        const sotto2 = scritte.some(o => x0 < o.x + o.w + 6 && x0 + w + 6 > o.x);
+        scritte.push({ x: x0, w });
+        const yy = T + PH + 36 + (sotto2 ? 14 : 0);
+        return linea(xm, T + PH, xm, yy - 13, colore, 1.6) + testo(xm + (anc === 'end' ? -4 : anc === 'start' ? 4 : 0), yy, t, { anchor: anc, bold: true, size: fs - 1, colore });
       };
       let aP = 'middle', aS = 'middle';
       if (Math.abs(X(p.durataPrevista) - X(m.durata)) < 90) { if (p.durataPrevista < m.durata) { aP = 'start'; aS = 'end'; } else { aP = 'end'; aS = 'start'; } }
