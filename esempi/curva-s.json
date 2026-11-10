@@ -107,10 +107,12 @@
       "bcws": true,
       "bcwp": true,
       "acwp": true,
+      "previsione": true,
       "frecce": true,
       "etichette": true
     }
   },
+  "note": [],
   "esporta": {
     "pagina": "stessa",
     "dimensione": "normale",

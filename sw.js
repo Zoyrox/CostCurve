@@ -3,7 +3,7 @@
  * Tiene in memoria i file del sito; se c'è la rete, li aggiorna.
  * Cambia VERSIONE quando pubblichi una nuova versione del sito.
  * ===================================================================== */
-const VERSIONE = 'costcurve-v3';
+const VERSIONE = 'costcurve-v3.0';
 const FILE = [
   './', 'index.html', 'manifest.webmanifest', 'css/stile.css', 'css/stampa.css',
   'js/numeri.js', 'js/calcoli.js', 'js/esempi.js', 'js/grafico.js', 'js/latex.js', 'js/report.js',
