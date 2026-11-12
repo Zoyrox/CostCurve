@@ -187,304 +187,113 @@ def nota(s):
 
 # ------------------------------------------------------------------ contenuto
 p = doc.add_paragraph()
-p.paragraph_format.space_after = Pt(14)
-r = p.add_run('PROGETTO – COSTCURVE: DIAGRAMMA COSTI-TEMPI CON OUTPUT LATEX PARAMETRICO')
-r.bold = True; r.font.size = Pt(20)
+p.paragraph_format.space_after = Pt(10)
+r = p.add_run('PROGETTO – COSTCURVE (DIAGRAMMA COSTI-TEMPI IN LATEX)')
+r.bold = True; r.font.size = Pt(18)
 
-par('**Autore e project manager:** Matviy Kalistyy, classe 5C INF, materia GPOI – a.s. 2026/27', dopo=2)
-par('**Periodo:** da venerdì 6 a giovedì 12 novembre 2026 (consegna)', dopo=2)
-par('**Prodotto:** file .tex parametrico, report PDF e sito di supporto (zoyrox.github.io/CostCurve)')
-par('La relazione segue, nell\'ordine, i 10 passi richiesti dal compito. L\'obiettivo non è descrivere il '
-    'prodotto, ma il **ragionamento di gestione del progetto**: come ho capito le richieste, quali criticità ho '
-    'individuato, come le ho trasformate in rischi, stime e pianificazione, e dove ho sbagliato.')
+par('**Matviy Kalistyy – 5C INF – GPOI**', dopo=2)
+par('Periodo: da venerdì 6 a giovedì 12 novembre 2026')
+par('Sito: zoyrox.github.io/CostCurve')
 
-# 1 -----------------------------------------------------------------------------------------------
-titolo('1. Conoscenza curricolare (libro, U4L3)')
-par('La pagina del libro descrive il **controllo di un progetto con il diagramma costi-tempi** (earned value). '
-    'Nel tempo si confrontano tre curve di costo cumulato:')
-tabella(['Curva', 'Significato', 'Domanda a cui risponde'], [
-    ['**BCWS**', 'costo pianificato a budget', 'quanto dovevo spendere fino a oggi secondo il piano?'],
-    ['**BCWP**', 'valore a budget del lavoro svolto', 'quanto vale, ai prezzi del piano, il lavoro fatto?'],
-    ['**ACWP**', 'costo effettivamente sostenuto', 'quanto ho speso davvero?'],
-], [2.2, 6.0, 8.4])
-par('A ogni monitoraggio si calcolano:', keep=True)
+titolo('1. Di cosa si tratta')
+par('Dalla pagina del libro (U4L3) il diagramma costi-tempi confronta tre curve: **BCWS** (costo pianificato), '
+    '**BCWP** (valore del lavoro fatto) e **ACWP** (costo reale). Da queste si calcolano CV = BCWP − ACWP e '
+    'SV = BCWP − BCWS, anche in percentuale. La teoria si capisce in poco tempo; il problema vero era capire '
+    'come disegnarlo in LaTeX.')
+
+titolo('2. Cosa chiedeva il compito')
 elenco([
-    '**CV = BCWP − ACWP** (scostamento dei costi): se è negativo sto spendendo più del valore prodotto;',
-    '**SV = BCWP − BCWS** (scostamento dei tempi): se è negativo sono in ritardo;',
-    '**%CV = CV / BCWS** e **%SV = SV / BCWS**: l\'andamento in percentuale.',
+    'diagramma costi-tempi con due monitoraggi;',
+    'curve BCWS, BCWP e ACWP, con tabella e legenda;',
+    'calcolo percentuale dell\'andamento (%CV e %SV);',
+    'output in formato .tex, riutilizzabile cambiando i dati;',
+    'documentazione della pianificazione con risorse e tempi.',
 ])
-par('**Tempo per capirlo:** circa 1 ora, perché la teoria occupa poche pagine. Il punto che conta per il progetto, '
-    'però, non è “cos\'è” il diagramma ma **come si disegna**, e soprattutto come si disegna in LaTeX (passo 2).')
+par('La parte critica era il **.tex**: non conoscevo LaTeX, quindi all\'inizio non sapevo quanto tempo ci sarebbe '
+    'voluto. Per questo la prima cosa da fare era una prova per vedere se riuscivo a disegnare un grafico in LaTeX.')
 
-# 2 -----------------------------------------------------------------------------------------------
-titolo('2. Analisi delle richieste')
-par('Ho riscritto le richieste del compito una per una, separando ciò che è **scritto** da ciò che **serve '
-    'capire** per eseguirlo:', keep=True)
-tabella(['Richiesta scritta', 'Cosa implica per chi esegue'], [
-    ['Diagramma costi-tempi con **due monitoraggi**', 'due istanti di controllo scelti dall\'utente, non a caso'],
-    ['Curve BCWS, BCWP, ACWP', 'tre serie di dati cumulati per periodo'],
-    ['Tabella e diagramma con **legenda dei parametri**', 'tabella dei valori, legenda delle curve, spiegazione dei simboli'],
-    ['**Calcolo percentuale** dell\'andamento', '%CV e %SV a ogni monitoraggio'],
-    ['**Output in formato .tex**', 'un sorgente LaTeX che si compila e disegna il grafico: tecnologia che non conoscevo'],
-    ['Utilizzabile per **progetti futuri**', 'il .tex deve essere parametrico: si cambiano i dati, non il disegno'],
-    ['Documentazione della pianificazione con **risorse** e **stima dei tempi**', 'WBS, stime per attività, Gantt, budget, rischi'],
-    ['Tempi di consegna e **penali**', 'consegna giovedì 12 novembre; penali per ritardo (e, forse, per anticipo)'],
-], [7.0, 9.6])
-sottotitolo('La criticità principale: il formato .tex')
-par('Una richiesta può essere scritta in italiano ma usare una terminologia che chi esegue non conosce: è il primo '
-    'rischio, quello di **chiarezza e comprensione**. Nel mio caso “output in formato .tex” era esattamente questo. '
-    'Non sapendo cosa comporta disegnare un grafico in LaTeX, **non potevo stimare** il lavoro: poteva richiedere '
-    'un\'ora come settimane. Per questo la prima attività da pianificare non era studiare le curve, ma fare una '
-    '**prova tecnica in LaTeX** per capire quanto costa disegnarle (attività A3 della pianificazione).')
-par('Il secondo aspetto è che il .tex deve funzionare come un modulo da compilare: una struttura fissa (il '
-    'disegno) e una zona in cui si inseriscono i valori (i dati). Chi lo riusa per un altro progetto deve sapere '
-    'esattamente dove mettere i numeri.')
-
-# 3 -----------------------------------------------------------------------------------------------
-titolo('3. Domande sulle ambiguità')
-par('Prima di pianificare ho annotato i punti non chiari. Per ognuno ho scritto l\'ipotesi adottata, in attesa di '
-    'conferma:', keep=True)
-tabella(['Domanda', 'Ipotesi adottata'], [
-    ['“Output in formato .tex”: basta un file con i numeri già calcolati o deve ricalcolare tutto se cambio i dati?', 'Parametrico: sezione DATI separata dal DISEGNO, calcoli fatti da LaTeX'],
-    ['I monitoraggi devono essere esattamente due o un numero qualsiasi?', 'Due, come scritto. Non generalizzo a N: costerebbe tempo non richiesto'],
-    ['Dove si collocano i due monitoraggi?', 'Li sceglie l\'utente come dato di input, non sono fissi nel disegno'],
-    ['Con quali dati si prova il lavoro?', 'Con l\'esempio numerico del libro, così i risultati sono verificabili'],
-    ['“Legenda dei parametri”: legenda del grafico o spiegazione dei simboli?', 'Entrambe: legenda delle curve e tabella che spiega CV, SV, %CV, %SV'],
-    ['%CV e %SV si calcolano su BCWS o su BCWP?', 'Su BCWS, come nel libro'],
-    ['Serve uno strumento per inserire i dati o basta modificare il .tex a mano?', 'Il requisito è il .tex; uno strumento di inserimento è un mezzo, non un obbligo'],
-    ['Esiste davvero una penale per la consegna in anticipo?', 'La considero valida: consegna esattamente il 12'],
-], [9.2, 7.4], size=10.5)
-
-# 4 -----------------------------------------------------------------------------------------------
-titolo('4. In che misura è un progetto')
-par('Un compito come “calcola 3 + 5” non è un progetto: si sa già come farlo, non ci sono incertezze né scelte da '
-    'pianificare. Questo lavoro invece lo è, perché ha tutte le caratteristiche di un progetto:', keep=True)
+titolo('3. Domande che mi sono fatto')
 elenco([
-    '**obiettivo unico** e definito: un diagramma costi-tempi parametrico in LaTeX;',
-    '**durata limitata**: dal 6 al 12 novembre;',
-    '**vincoli** di tempo (una persona, al massimo 2-3 ore al giorno), di costo (nessuna spesa prevista) e di qualità;',
-    '**incertezza**: una tecnologia mai usata (LaTeX), quindi una stima non immediata;',
-    '**criticità** che possono diventare rischi.',
+    'Il .tex deve avere i numeri già calcolati o deve ricalcolare tutto se cambio i dati? → Ho scelto la seconda: '
+    'i dati sono in una parte separata.',
+    'I monitoraggi devono essere due o un numero qualsiasi? → Due, come scritto.',
+    'Con quali dati lo provo? → Con l\'esempio del libro, così posso controllare i risultati.',
+    '%CV e %SV si calcolano su BCWS? → Sì, come nel libro.',
 ])
-par('Una **criticità diventa un rischio** quando può avere un impatto sui **tempi** o sui **costi**. In questo '
-    'progetto, dove all\'inizio non era prevista alcuna spesa, l\'impatto principale era sul tempo.')
-par('Come progetto ha bisogno di: definizione dell\'obiettivo e dei requisiti, scomposizione in attività (WBS), '
-    'stima dei tempi, calendario (Gantt), budget, analisi dei rischi, studio di fattibilità, controllo '
-    'dell\'avanzamento e documentazione finale.')
 
-# 5 -----------------------------------------------------------------------------------------------
-nuova_pagina()
+titolo('4. È un progetto?')
+par('Sì: ha un obiettivo preciso, una scadenza (giovedì 12), dei vincoli (lavoro da solo, 2-3 ore al giorno, '
+    'nessuna spesa prevista) e soprattutto una parte che non sapevo fare (LaTeX). Quindi serviva pianificarlo: '
+    'attività, tempi, rischi.')
+
 titolo('5. Pianificazione')
-par('La pianificazione (documento separato, versione 1.0) è stata fatta nell\'ora iniziale di venerdì 6 novembre '
-    'e poi aggiornata durante la settimana, come previsto dal compito. Qui riporto i punti essenziali.')
-sottotitolo('Risorse e tariffe (ipotizzate)')
-tabella(['Risorsa', 'Chi', 'Tariffa'], [
-    ['Project management', 'io, nel ruolo di project manager', '40 €/h'],
-    ['Consulenza (LaTeX, earned value)', 'assistente AI e verifiche sul libro', '50 €/h'],
-    ['Esecuzione informatica', 'sviluppo e test (io con supporto AI)', '30 €/h'],
-], [5.2, 8.4, 3.0], destra=(2,))
-par('Le tariffe servono a valutare il **costo figurativo** delle ore; non sono soldi spesi.', size=10, colore='444444')
-sottotitolo('Attività e stima dei tempi (stima bottom-up)')
-tabella(['Id', 'Attività', 'Ore', 'Precedenze'], [
-    ['A1', 'Avvio e analisi dei requisiti', '1', '—'],
-    ['A2', 'Pianificazione (documento della prima ora)', '1,5', 'A1'],
-    ['A3', '**Prototipo LaTeX (prova tecnica)**', '1,5', 'A1'],
-    ['A4', 'Progettazione di interfaccia e dati', '1', 'A2, A3'],
-    ['A5', 'Modulo di calcolo e test automatici', '1,5', 'A4'],
-    ['A6', 'Generatore del file .tex', '2,5', 'A5'],
-    ['A7', 'Anteprima del diagramma', '2', 'A5'],
-    ['A8', 'Interfaccia, validazioni e salvataggio', '2', 'A7'],
-    ['A9', 'Report PDF e stampa', '1', 'A8'],
-    ['A10', 'Collaudo completo', '1,5', 'A6, A9'],
-    ['A11', 'Pubblicazione', '0,5', 'A10'],
-    ['A12', 'Guida d\'uso e consegna', '1', 'A11'],
-    ['', 'Totale attività + riserva di 3 ore', '17 + 3', ''],
-], [1.4, 9.6, 2.2, 3.4], destra=(2,), totale=True, size=10.5)
-par('Il prototipo LaTeX (A3) parte il primo giorno, in parallelo alla pianificazione: è la criticità più grave, e '
-    'conviene scoprire subito quanto costa, perché da A3 dipende la stima di A6. Ho fissato tre livelli di priorità '
-    '(obbligatorio, consigliato, facoltativo): se il tempo manca si taglia dal basso.')
-sottotitolo('Budget di base (costo figurativo delle ore)')
-tabella(['Voce', 'Importo'], [
-    ['Baseline delle attività (17 ore)', '605 €'],
-    ['Riserva di gestione (3 ore di esecuzione)', '90 €'],
-    ['Budget di base', '695 €'],
-    ['Spesa in denaro prevista', '0 € (strumenti gratuiti)'],
-], [10.0, 5.0], destra=(1,))
+par('Il 6 novembre, nell\'ora in classe, ho fatto la pianificazione (documento a parte), poi l\'ho aggiornata '
+    'durante la settimana. In breve:', keep=True)
+elenco([
+    '12 attività, **17 ore** stimate più **3 ore di riserva** (20 ore su circa 21 disponibili);',
+    'prima attività importante: la prova di LaTeX, perché da lì dipendeva tutto il resto;',
+    'risorse: io come project manager, consulenza (AI e libro) ed esecuzione informatica;',
+    'costo figurativo delle ore: 695 € (con la riserva); spesa reale prevista: 0 €.',
+])
 
-sottotitolo('Rischi (dalla pianificazione, gravità = probabilità × impatto, scala 1-3)')
-tabella(['Rischio', 'P', 'I', 'Gravità', 'Risposta pianificata'], [
-    ['LaTeX sconosciuto: non riuscire a scrivere un .tex parametrico che compila', '3', '3', '**9**', 'Prototipo A3 il primo giorno; consulenza'],
-    ['Errori di compilazione o di disegno del .tex con certi dati', '2', '3', '6', 'Compilare automaticamente tutti i casi di prova'],
-    ['Formule sbagliate (CV e SV invertiti, percentuale sulla base sbagliata)', '2', '3', '6', 'Test sull\'esempio numerico del libro'],
-    ['Ritardo nella consegna (penale 2% al giorno)', '2', '3', '6', 'Priorità, riserva, prodotto congelato mercoledì sera'],
-    ['Scope creep: aggiungere funzioni “belle” prima di finire quelle obbligatorie', '3', '2', '6', 'Prima tutto l\'obbligatorio, poi il resto'],
-    ['Anteprima e .tex con numeri o aspetto diversi', '2', '2', '4', 'Un solo modello di calcolo per tutti gli output'],
-    ['Problemi di pubblicazione online', '1', '2', '2', 'Prova in locale; consegna in zip come piano B'],
-], [7.0, 0.8, 0.8, 1.6, 6.4], size=10)
-
-# 6 -----------------------------------------------------------------------------------------------
 titolo('6. Studio di fattibilità')
-par('Il documento che serve a decidere se il progetto si può svolgere rispettando i vincoli è lo **studio di '
-    'fattibilità**. Ho verificato le **condizioni necessarie** (senza le quali il progetto fallisce) e quelle '
-    '**sufficienti** (che, insieme alle necessarie, ne garantiscono la riuscita).', keep=True)
-tabella(['Condizione', 'Tipo', 'Al 6 novembre', 'Al 9 novembre'], [
-    ['Formule chiare e verificate', 'Necessaria', 'Sì', 'Sì'],
-    ['Saper produrre un .tex con pgfplots che compila', 'Necessaria', 'Da verificare (A3)', 'Sì, con l\'AI a pagamento'],
-    ['Tempo disponibile ≥ tempo stimato (20 ore ≤ 21)', 'Necessaria', 'Sì, al limite', '**No**, con lo strumento gratuito'],
-    ['Costo in denaro = 0 €', 'Vincolo', 'Sì', '**No**, se si vuole rispettare il tempo'],
-    ['Browser, account GitHub, LaTeX online (Overleaf)', 'Necessaria', 'Sì', 'Sì'],
-    ['Un solo modello di calcolo per sito, .tex e PDF', 'Sufficiente', 'Previsto', 'Sì'],
-    ['Priorità rispettate e controllo dell\'avanzamento', 'Sufficiente', 'Previsto', 'In parte (vedi punto 9)'],
-], [6.4, 2.4, 3.4, 4.4], size=10.5)
-par('**Esito al 6 novembre:** fattibile, a condizione di superare la prova tecnica in LaTeX, con un margine di tempo '
-    'molto stretto (20 ore su 21).')
-par('**Esito al 9 novembre:** il 7 e l\'8 novembre ho provato a lavorare con un assistente AI gratuito, come '
-    'previsto dal vincolo di costo zero. Il risultato non era soddisfacente e ho perso circa 4 ore. Con il tempo '
-    'rimasto, **non era più possibile rispettare insieme** il vincolo di tempo, quello di costo e i requisiti.')
+par('Il 6 novembre il progetto sembrava fattibile ma al limite: il tempo bastava appena e dovevo ancora capire se '
+    'riuscivo con LaTeX. Il 7 e l\'8 ho provato con un\'AI gratuita, ma il risultato non andava bene e ho perso '
+    'circa 4 ore. A quel punto, con il tempo rimasto, non riuscivo più a rispettare tutti i vincoli insieme.')
 
-# 7 -----------------------------------------------------------------------------------------------
 titolo('7. Soluzione alternativa')
-par('Non potendo rispettare tutti i vincoli, ho confrontato tre alternative, ognuna delle quali altera un vincolo:',
-    keep=True)
-tabella(['Alternativa', 'Vincolo alterato', 'Conseguenza', 'Scelta'], [
-    ['Spostare la consegna', 'Tempo', 'Impossibile: data fissa e penale del 2% al giorno', 'No'],
-    ['Ridurre i requisiti (es. .tex non parametrico)', 'Qualità / ambito', 'Prodotto non conforme alla richiesta principale', 'No'],
-    ['Abbonamento a un\'AI a pagamento (Claude, 25 € per un mese)', 'Costo: da 0 € a 25 €', 'Requisiti e data rispettati, spesa contenuta e fissa', '**Sì**'],
-], [5.2, 3.4, 6.0, 2.0], size=10.5)
-par('Ho scelto di **rilassare il vincolo di costo**, perché era l\'unico con un impatto limitato e prevedibile. È una '
-    'revisione del piano (versione 1.1 del 9 novembre): la spesa passa da 0 € a 25 €.')
+par('Le possibilità erano tre: spostare la consegna (impossibile), fare meno di quanto richiesto (prodotto non '
+    'conforme) oppure spendere qualcosa. Il 9 novembre ho scelto di **pagare un mese di Claude AI (25 €)**: ho '
+    'cambiato il vincolo di costo, ma ho rispettato la scadenza e le richieste.')
 
-# 8 -----------------------------------------------------------------------------------------------
-nuova_pagina()
 titolo('8. Esecuzione')
-sottotitolo('Gantt a consuntivo')
-par('In **blu** il lavoro utile, in **grigio** il tentativo con l\'AI gratuita, poi abbandonato.', keep=True)
-giorni = ['ven 6', 'sab 7', 'dom 8', 'lun 9', 'mar 10', 'mer 11', 'gio 12']
-attivita = [
-    ('A1-A2 Requisiti e pianificazione', 'b......'),
-    ('Tentativo con AI gratuita', '.rr....'),
-    ('A3 Prototipo LaTeX', '...b...'),
-    ('A4-A9 Realizzazione (v1)', '...b...'),
-    ('Revisione v2', '...bb..'),
-    ('Revisione v3 (oltre la richiesta)', '....b..'),
-    ('A10 Collaudo (PC e telefono)', '...bbb.'),
-    ('A11-A12 Pubblicazione e consegna', '....bbb'),
-]
-g = doc.add_table(rows=1, cols=8)
-bordi(g, dentro_bianco=True)
-for i, h in enumerate(['Attività'] + giorni):
-    c = g.rows[0].cells[i]; c.text = ''
-    r = c.paragraphs[0].add_run(h); r.bold = True; r.font.size = Pt(9 if i else 11)
-    if i: c.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
-for nome, barre in attivita:
-    cells = g.add_row().cells
-    cells[0].text = ''; cells[0].paragraphs[0].add_run(nome).font.size = Pt(10.5)
-    for k, ch in enumerate(barre, 1):
-        cells[k].text = ''
-        sfondo(cells[k], {'b': BLU, 'r': GRIGIO}.get(ch, VUOTO))
-colonne(g, [6.4] + [1.45] * 7)
-for riga in g.rows:
-    riga_non_spezzata(riga)
-    for i, c in enumerate(riga.cells):
-        for p in c.paragraphs: p.paragraph_format.space_after = Pt(1)
-intera(g)
-doc.add_paragraph().paragraph_format.space_after = Pt(2)
+tabella(['Giorno', 'Cosa ho fatto'], [
+    ['ven 6', 'studio del libro, analisi delle richieste, pianificazione'],
+    ['sab 7 – dom 8', 'tentativo con l\'AI gratuita (abbandonato)'],
+    ['lun 9', 'abbonamento, prova LaTeX, prima versione funzionante, prime correzioni'],
+    ['mar 10', 'seconda e terza versione, prove su PC e telefono, pubblicazione'],
+    ['mer 11', 'prove finali e documentazione'],
+    ['gio 12', 'consegna'],
+], [3.2, 13.4])
+par('Ore totali: circa **20,5** (di cui 4 perse con l\'AI gratuita). Lunedì e martedì ho lavorato più delle 2-3 '
+    'ore previste, per recuperare.')
 
-tabella(['Fase', 'Previste', 'Effettive'], [
-    ['Requisiti e pianificazione', '2,5', '2,5'],
-    ['Tentativo con AI gratuita (non previsto)', '0', '4'],
-    ['Realizzazione e revisioni', '11,5', '8'],
-    ['Collaudo, pubblicazione e consegna', '3', '6'],
-    ['Riserva', '3', '—'],
-    ['Totale ore', '20', '20,5'],
-], [9.0, 2.6, 2.6], destra=(1, 2), totale=True)
-nota('Il totale è quasi uguale al previsto, ma la distribuzione no: le 4 ore perse sono state recuperate solo '
-     'grazie all\'AI a pagamento, che ha ridotto il tempo di realizzazione. Lunedì 9 e martedì 10 ho superato le '
-     '2-3 ore al giorno previste.')
-
-sottotitolo('Revisioni del prodotto')
-tabella(['Versione', 'Contenuto', 'Motivo', 'Richiesta?'], [
-    ['v1', '.tex parametrico, calcoli, grafico, tabella, report PDF', 'Requisiti del compito', 'Sì'],
-    ['v2', 'Dati per periodo, 1-2 monitoraggi, zoom fedele ai dati, export a scelta', 'Il .tex non permetteva di inserire i dati reali di un progetto', 'In parte'],
-    ['v3', 'Grafico per telefono, cruscotto, presentazione, import da Excel, app installabile', 'Leggibilità su telefono, poi molte aggiunte', '**No**'],
-    ['v3.0.1', 'Correzione di un errore di aggiornamento del sito', 'Difetto trovato dopo la pubblicazione', '—'],
-], [1.8, 6.6, 5.6, 2.6], size=10.5)
-
-f = doc.add_table(rows=2, cols=2)
-bordi(f)
-colonne(f, [12.2, 4.4])
-f.rows[0].cells[0].paragraphs[0].add_run().add_picture('sito-pc.png', width=Cm(11.8))
-f.rows[0].cells[1].paragraphs[0].add_run().add_picture('sito-telefono.png', width=Cm(4.1))
-for c, s in zip(f.rows[1].cells, ['Figura 1 – Il sito con l\'esempio del libro.', 'Figura 2 – Il grafico sul telefono.']):
-    c.text = ''; r = c.paragraphs[0].add_run(s); r.font.size = Pt(9); r.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
-for riga in f.rows:
-    riga_non_spezzata(riga)
-    for c in riga.cells: c.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
-f.rows[0].cells[0].paragraphs[0].paragraph_format.keep_with_next = True
-
-# 9 -----------------------------------------------------------------------------------------------
-titolo('9. Conformità del prodotto alle specifiche')
-tabella(['Specifica', 'Esito', 'Verifica'], [
-    ['Diagramma con due monitoraggi', 'Conforme', 'Esempio del libro ricostruito'],
-    ['Curve BCWS, BCWP, ACWP', 'Conforme', 'Grafico nel .tex compilato e nel PDF'],
-    ['Tabella e legenda dei parametri', 'Conforme', 'Presenti nel .tex, nel PDF e nel sito'],
-    ['%CV e %SV', 'Conforme', 'Valori uguali all\'esempio numerico del libro'],
-    ['Output .tex parametrico', 'Conforme', 'Cambiando un dato nella sezione DATI e ricompilando, tutti i valori si aggiornano'],
-    ['Sito e .tex danno gli stessi numeri', 'Conforme', '7 casi di prova, 0 differenze, 0 avvisi LaTeX'],
-    ['Pianificazione con risorse e stime', 'Conforme', 'Documento di pianificazione (PDF e ODT)'],
-    ['Consegna il 12 novembre', 'Conforme', '—'],
-], [5.6, 2.2, 8.8], size=10.5)
-sottotitolo('Oltre la richiesta: un errore di gestione')
-par('Il prodotto consegnato fa **molto più di quanto richiesto**: un sito completo, tema scuro, modalità '
-    'presentazione, importazione da Excel, app installabile. In un progetto andare oltre la richiesta è un **errore**, '
-    'anche se il risultato è bello:')
+titolo('9. Rischi e problemi riscontrati')
+par('**Rischi previsti nella pianificazione e cosa è successo:**', keep=True)
+tabella(['Rischio', 'Com\'è andata'], [
+    ['Non riuscire a fare il .tex (LaTeX sconosciuto)', 'Superato, ma solo con l\'AI a pagamento'],
+    ['Formule sbagliate', 'Controllate con l\'esempio del libro: corrette'],
+    ['Ritardo sulla consegna', 'Evitato, recuperando ore lunedì e martedì'],
+    ['Aggiungere cose non richieste', '**Successo**: ho fatto molto più del necessario'],
+    ['Sito e .tex con numeri diversi', 'Controllato: stessi numeri'],
+], [8.0, 8.6])
+par('**Problemi riscontrati:**', keep=True)
 elenco([
-    'aumenta **tempi e costi** (martedì 10 è stato quasi interamente dedicato alla v3, non richiesta);',
-    'aumenta il codice da verificare, e infatti un difetto è arrivato online (v3.0.1);',
-    'il rischio “scope creep”, previsto nella pianificazione con gravità 6, **si è verificato**: la risposta '
-    'pianificata (prima l\'obbligatorio, poi il resto) l\'ho rispettata solo in parte.',
-])
-par('Un\'osservazione onesta: avere a disposizione un\'AI potente mi ha permesso di **risolvere** il problema, ma '
-    'il merito di gestione non sta nel prodotto. Sta nell\'aver capito prima la criticità del .tex, averla '
-    'trasformata in un rischio stimato e aver deciso consapevolmente come rispondere quando il piano non reggeva.')
-
-# 10 ----------------------------------------------------------------------------------------------
-titolo('10. Consegna')
-par('Giovedì 12 novembre consegno:', keep=True)
-elenco([
-    'il **file .tex parametrico** con un esempio già compilato in PDF;',
-    'il **documento di pianificazione** (versione 1.0 del 6 novembre, aggiornata il 9);',
-    'la **guida d\'uso** di una pagina;',
-    'il link al **sito**: zoyrox.github.io/CostCurve;',
-    'questa **relazione**.',
+    'l\'**AI gratuita** non era adatta: 4 ore perse e 25 € di spesa non prevista;',
+    'la **prima versione** non permetteva di inserire i dati reali di un progetto: ho dovuto rifarne una parte;',
+    'sul **telefono** il grafico era poco leggibile, corretto nella terza versione;',
+    'dopo la pubblicazione il sito appariva "rotto" per un problema di aggiornamento dei file: corretto in giornata;',
+    '**sono andato oltre la richiesta** (sito completo, tema scuro, presentazione, importazione da Excel): è stato '
+    'un errore, perché ha preso tempo e ha portato altri problemi da correggere.',
 ])
 
-sottotitolo('Consuntivo dei costi')
-tabella(['Voce', 'Previsto', 'Effettivo', 'Scostamento'], [
-    ['Spesa in denaro (abbonamento AI)', '0 €', '25 €', '+25 €'],
-    ['Ore di lavoro', '20 (con riserva)', '20,5', '+0,5'],
-    ['di cui ore perse (tentativo gratuito)', '0', '4', '+4'],
-], [7.6, 3.0, 2.6, 2.8], destra=(1, 2, 3), size=10.5)
+titolo('10. Conformità e consegna')
+par('Tutto quello che chiedeva il compito è presente: due monitoraggi, le tre curve, tabella e legenda, %CV e %SV, '
+    'file .tex che si ricalcola cambiando i dati, pianificazione con risorse e tempi. Ho controllato i numeri con '
+    'l\'esempio del libro e il .tex compila senza errori.')
+par('Consegno: il file .tex con un esempio in PDF, la pianificazione, una guida d\'uso, il link al sito e questa '
+    'relazione.')
 
-sottotitolo('Valutazione critica')
+titolo('Costi finali')
 elenco([
-    '**Ho fatto bene** a mettere il prototipo LaTeX all\'inizio: era la criticità principale e lo studio di '
-    'fattibilità dipendeva da lì.',
-    '**Ho sbagliato** a non fissare un limite al tentativo con l\'AI gratuita (per esempio “se dopo 2 ore non '
-    'funziona, cambio”): ho perso due giorni prima di rivedere il piano.',
-    '**Ho sbagliato** ad andare oltre la richiesta con la v3: tempo e rischi in più senza un requisito che lo '
-    'chiedesse.',
-    '**Ho sbagliato** a non provare il sito pubblicato prima di chiudere la v3.',
-    '**Limite che resta:** il codice è stato scritto dall\'AI e lo capisco nelle linee generali; la parte che '
-    'conosco meglio, e che so modificare, è la sezione DATI del .tex.',
+    'spesa prevista: 0 € → spesa reale: **25 €** (abbonamento Claude AI);',
+    'ore previste: 20 → ore reali: circa 20,5.',
 ])
 
-titolo('Conclusioni')
-par('Il progetto è stato consegnato nei tempi e conforme alle specifiche, con uno scostamento di 25 € sui costi '
-    'dovuto a una decisione presa consapevolmente con lo studio di fattibilità. La cosa più importante che ho imparato è '
-    'che il valore di un progetto non si misura da quanto il prodotto è ricco, ma da quanto si è capito il '
-    'problema prima di risolverlo: requisiti chiari, criticità riconosciute, rischi stimati e un piano che si '
-    'aggiorna quando la realtà cambia.')
+titolo('Cosa ho imparato')
+par('Che bisogna capire bene le richieste e le parti difficili prima di iniziare, e darsi un limite quando una '
+    'strada non funziona (avrei dovuto lasciare l\'AI gratuita dopo un paio d\'ore, non dopo due giorni). E che '
+    'fare più del richiesto non è un merito: costa tempo e aggiunge rischi.')
 
 doc.core_properties.title = 'Relazione di progetto – CostCurve'
 doc.core_properties.author = 'Matviy Kalistyy'
