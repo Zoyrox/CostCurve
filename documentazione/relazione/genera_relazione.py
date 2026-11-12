@@ -186,56 +186,131 @@ def nota(s):
 
 
 # ------------------------------------------------------------------ contenuto
+def codice(righe):
+    for i, riga in enumerate(righe):
+        p = doc.add_paragraph()
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.line_spacing = 1.0
+        p.paragraph_format.left_indent = Cm(0.6)
+        p.paragraph_format.keep_with_next = i < len(righe) - 1
+        r = p.add_run(riga if riga else ' ')
+        r.font.name = 'Courier New'; r.font.size = Pt(9)
+        r.element.rPr.rFonts.set(qn('w:eastAsia'), 'Courier New')
+    doc.add_paragraph().paragraph_format.space_after = Pt(2)
+
+
 p = doc.add_paragraph()
 p.paragraph_format.space_after = Pt(10)
 r = p.add_run('PROGETTO – COSTCURVE (DIAGRAMMA COSTI-TEMPI IN LATEX)')
 r.bold = True; r.font.size = Pt(18)
 
 par('**Matviy Kalistyy – 5C INF – GPOI**', dopo=2)
-par('Dal 6 al 12 novembre 2026')
+par('Dal 6 al 12 novembre 2026 · sito: zoyrox.github.io/CostCurve')
 
-titolo('Il progetto')
-par('Il compito chiedeva un diagramma costi-tempi (BCWS, BCWP, ACWP) con due monitoraggi, tabella, legenda, '
-    '%CV e %SV, con **output in formato .tex** riutilizzabile cambiando solo i dati.')
+titolo('1. Il progetto')
+par('Il compito chiedeva di produrre il **diagramma costi-tempi** di un progetto con le curve BCWS (costo '
+    'pianificato), BCWP (valore del lavoro svolto) e ACWP (costo reale), due monitoraggi, una tabella con la legenda '
+    'dei parametri e il calcolo di CV, SV, %CV e %SV. L\'output doveva essere in **formato .tex**, cioè un sorgente '
+    'LaTeX, e doveva poter essere riusato per altri progetti cambiando solo i dati.')
+par('Ho lavorato da solo, nel ruolo di project manager, con al massimo 2-3 ore al giorno e la consegna fissata a '
+    'giovedì 12 novembre. Come strumento di sviluppo e di consulenza ho usato l\'intelligenza artificiale.')
 
-titolo('Il problema principale: il TeX')
-par('La teoria del diagramma (libro, U4L3) si capisce in poco tempo. Il vero problema era il **TeX**, che non '
-    'conoscevo per niente: non sapevo come si scrive, come si compila e tanto meno come si disegna un grafico. '
-    'Quindi all\'inizio **non potevo nemmeno stimare** quanto tempo mi serviva: poteva essere un\'ora come settimane.')
+titolo('2. Il problema principale: il TeX')
+par('La teoria del diagramma (libro, U4L3) era chiara: sono poche pagine e le formule sono semplici. Il vero '
+    'ostacolo era il **TeX**, che non conoscevo per niente. Non sapevo come si scrive un file .tex, come si compila, '
+    'né come si disegna un grafico con delle curve. In più il file non doveva contenere un grafico “fisso”, ma '
+    'ricalcolare da solo curve e indicatori quando cambiano i dati.')
+par('Questo significava che all\'inizio **non potevo stimare** quanto tempo mi serviva: una persona che conosce '
+    'LaTeX lo fa in poche ore, io potevo metterci settimane. Per questo nella pianificazione del 6 novembre ho messo '
+    'come prima attività una **prova tecnica in LaTeX**, per capire subito se e come si poteva fare.')
 
-titolo('Rischi')
+titolo('3. Rischi')
+par('Nella pianificazione ho individuato questi rischi principali:', keep=True)
+tabella(['Rischio', 'Perché era un rischio', 'Come l\'ho gestito'], [
+    ['Non riuscire a fare il .tex', 'Senza il .tex il compito non è consegnabile, e non conoscevo LaTeX', 'Prova tecnica all\'inizio; AI usata come consulente per il TeX'],
+    ['.tex con errori o calcoli sbagliati', 'Non conoscendo il TeX, non mi sarei accorto facilmente degli errori', 'Controllo con l\'esempio numerico del libro'],
+    ['Ritardo sulla consegna', 'Poco tempo (2-3 ore al giorno) e una scadenza fissa', 'Riserva di 3 ore e priorità sulle parti obbligatorie'],
+    ['Fare più del richiesto', 'Le parti in più consumano tempo e portano nuovi errori', 'Previsto, ma non l\'ho rispettato fino in fondo (punto 5)'],
+], [4.2, 6.2, 6.2], size=10.5)
+
+titolo('4. Come si è svolto il lavoro')
+par('**Venerdì 6.** Ho letto il compito e il libro, ho scritto i requisiti e le domande sulle parti poco chiare (per '
+    'esempio se il .tex doveva ricalcolare i valori o solo mostrarli) e ho fatto la pianificazione: 12 attività, 17 '
+    'ore stimate più 3 di riserva, su circa 21 disponibili.')
+par('**Sabato 7 e domenica 8.** Ho provato con un\'**AI gratuita**. Riusciva a scrivermi il codice, ma il problema '
+    'vero restava il TeX, che non mi risolveva. Inoltre puntavo in alto: invece di concentrarmi sul .tex, cercavo '
+    'di farmi fare un sito completo. Risultato: circa 4 ore perse e nessun .tex funzionante.')
+par('**Lunedì 9.** Con il tempo rimasto non potevo più rispettare insieme scadenza, richieste e costo zero. Dovevo '
+    'scegliere quale vincolo cambiare: spostare la consegna non era possibile, ridurre le richieste avrebbe reso il '
+    'lavoro non conforme. Ho scelto di **spendere 25 €** per un mese di Claude AI. Con questo ho fatto prima la prova '
+    'in LaTeX, poi il .tex vero e la prima versione completa. Provandola mi sono accorto che non permetteva di '
+    'inserire i dati di un progetto reale, quindi ho fatto una seconda versione.')
+par('**Martedì 10.** Ho sistemato la visualizzazione su telefono e ho pubblicato il sito. Qui sono andato oltre '
+    'il richiesto, aggiungendo funzioni che il compito non chiedeva. Dopo la pubblicazione il sito appariva “rotto” '
+    'sul mio browser per un problema di aggiornamento dei file: l\'ho corretto in giornata.')
+par('**Mercoledì 11.** Prove finali su PC e telefono e documentazione.')
+par('**Giovedì 12.** Consegna.')
+
+titolo('5. Il risultato')
+sottotitolo('Il file .tex')
+par('Il file è diviso in due parti. Nella parte **DATI** ci sono solo i numeri del progetto: durata, budget, costi '
+    'pianificati, valori rilevati e i due monitoraggi. Per esempio:', keep=True)
+codice([
+    r'\newcommand{\Durata}{23}',
+    r'\newcommand{\BAC}{540000}',
+    r'\newcommand{\PuntiBCWP}{10/140000, 16/330000}',
+    r'\newcommand{\PuntiACWP}{10/180000, 16/420000}',
+    r'\newcommand{\TempoA}{10}   % primo monitoraggio',
+    r'\newcommand{\TempoB}{16}   % secondo monitoraggio',
+])
+par('Nella parte **DISEGNO** non ci sono numeri: è LaTeX a calcolare le curve, CV, SV, le percentuali, la tabella e '
+    'le frasi di commento. Per un altro progetto basta cambiare i dati e ricompilare, anche su Overleaf.')
+
+f = doc.add_paragraph()
+f.alignment = WD_ALIGN_PARAGRAPH.CENTER
+f.paragraph_format.keep_with_next = True
+f.add_run().add_picture('grafico-tex.png', width=Cm(12.5))
+c = par('Figura 1 – Il grafico prodotto dal .tex compilato, con l\'esempio del libro (pag. 199).',
+        size=9, colore='555555')
+c.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+sottotitolo('Il sito')
+par('Per non dover scrivere i dati a mano nel .tex ho fatto anche un sito: si inseriscono i dati, si vede '
+    'l\'anteprima del grafico e si scarica il .tex con quei valori già inseriti, oppure il report in PDF. Il sito '
+    'è un supporto, il prodotto richiesto resta il .tex.')
+
+sottotitolo('Controlli')
 elenco([
-    '**Non riuscire a fare il .tex** in tempo, o farlo che non compila: era il rischio più grave, perché senza il '
-    '.tex il compito non era consegnabile.',
-    '**Fare un .tex sbagliato** (curve o formule errate) senza accorgermene, proprio perché non conoscevo il TeX.',
-    '**Ritardo** sulla consegna di giovedì 12.',
-    '**Puntare troppo in alto**, cioè fare più di quanto richiesto e perdere tempo sulle cose non richieste.',
+    'il .tex compila senza errori;',
+    'con i dati dell\'esempio del libro, CV, SV, %CV e %SV coincidono con quelli del libro (per esempio al mese 10: '
+    'CV = −40.000, SV = −26.000);',
+    'cambiando a mano un valore nella parte DATI e ricompilando, grafico, tabella e frasi si aggiornano;',
+    'il sito e il .tex danno gli stessi numeri;',
+    'il sito funziona su PC e telefono.',
 ])
 
-titolo('Problemi che ho incontrato')
+titolo('6. Problemi incontrati')
 elenco([
-    'Il 7 e l\'8 novembre ho usato un\'**AI gratuita**: riusciva a scrivermi il codice, ma non risolveva il problema '
-    'vero, il TeX. In più io puntavo in alto (volevo un sito completo), quindi ho perso circa 4 ore su cose che il '
-    'compito non chiedeva.',
-    'Con il tempo rimasto non potevo più rispettare insieme scadenza, richieste e costo zero.',
-    'Anche dopo, ho continuato ad aggiungere cose non richieste. È stato un errore: il rischio di “puntare troppo '
-    'in alto” l\'avevo previsto e si è verificato.',
+    '**Il TeX:** era la parte che non conoscevo e quella da cui dipendeva tutto. L\'ho superato solo con un aiuto '
+    'esterno (l\'AI usata come consulente).',
+    '**L\'AI gratuita:** scriveva codice, ma non risolveva il problema del TeX; due giorni con poco risultato.',
+    '**Puntare troppo in alto:** ho speso tempo su un sito completo e su funzioni non richieste, invece di '
+    'concentrarmi subito sul .tex.',
+    '**Prima versione incompleta:** non permetteva di inserire i dati reali di un progetto, ho dovuto rifarne una parte.',
+    '**Errore dopo la pubblicazione:** il sito non si aggiornava bene nel browser; corretto in giornata.',
 ])
 
-titolo('Come sono arrivato al risultato')
+titolo('7. Tempi e costi')
 elenco([
-    'Il 9 novembre ho deciso di **spendere 25 €** per un mese di Claude AI, cambiando il vincolo di costo per '
-    'rispettare scadenza e richieste.',
-    'L\'ho usato soprattutto come **consulente per il TeX**: prima una prova per vedere se il grafico si poteva '
-    'disegnare, poi il .tex vero, diviso in una parte **DATI** (dove si cambiano i numeri) e una parte che disegna.',
-    'Ho **controllato il risultato con l\'esempio del libro**: il .tex compila e i valori di CV, SV, %CV e %SV '
-    'coincidono. Cambiando un dato e ricompilando, tutto si aggiorna.',
-    'Ho consegnato nei tempi, con circa 20 ore di lavoro (4 perse) e 25 € di spesa invece di 0.',
+    'ore previste: 20 (17 + 3 di riserva); ore reali: circa 20,5, di cui 4 perse con l\'AI gratuita. Lunedì e '
+    'martedì ho lavorato più delle 2-3 ore previste per recuperare;',
+    'spesa prevista: 0 €; spesa reale: **25 €** (abbonamento Claude AI).',
 ])
 
-titolo('Cosa ho imparato')
-par('Il problema vero va capito subito: per me era il TeX, non il resto. E puntare più in alto del richiesto non '
-    'aiuta: fa perdere tempo e aggiunge rischi.')
+titolo('8. Conclusione')
+par('Il progetto è stato consegnato in tempo e il .tex fa quello che chiedeva il compito. La difficoltà vera non '
+    'era il diagramma, ma il TeX: se l\'avessi riconosciuto subito come unico punto critico, invece di inseguire un '
+    'sito completo, avrei risparmiato due giorni e probabilmente anche i 25 €.')
 
 doc.core_properties.title = 'Relazione di progetto – CostCurve'
 doc.core_properties.author = 'Matviy Kalistyy'
